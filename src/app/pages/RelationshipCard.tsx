@@ -129,7 +129,7 @@ const RelationshipCards = () => {
         <motion.section 
             ref={containerRef}
             style={{ opacity, scale, y }}
-            className="py-16 px-4 md:px-16 bg-gray-50 dark:bg-gray-800 transition-colors duration-300 overflow-hidden"
+            className="relative py-16 px-4 md:px-16 bg-gray-50 dark:bg-gray-800 transition-colors duration-300 w-full overflow-hidden"
         >
             <div className="container mx-auto">
                 <motion.h2 
@@ -145,80 +145,87 @@ const RelationshipCards = () => {
                     variants={containerVariants}
                     initial="hidden"
                     animate={isInView ? "visible" : "hidden"}
-                    className="flex overflow-x-auto space-x-4 pb-4 scrollbar-hide snap-x snap-mandatory"
+                    className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory -mx-4 px-4"
+                    style={{
+                        scrollbarWidth: 'none',
+                        msOverflowStyle: 'none',
+                        WebkitOverflowScrolling: 'touch'
+                    }}
                 >
-                    {cards.map((card, index) => (
-                        <motion.div 
-                            key={index}
-                            variants={cardVariants}
-                            className="flex-shrink-0 w-[calc(100vw-40px)] md:w-[calc(50vw-40px)] lg:w-[calc(25vw-32px)] snap-center perspective-1000"
-                        >
-                            <motion.div
-                                whileHover={{ 
-                                    scale: 1.05,
-                                    rotateY: 5,
-                                    translateZ: 20,
-                                    transition: { duration: 0.3 }
-                                }}
-                                className="h-full"
+                    <div className="flex space-x-4 pb-4">
+                        {cards.map((card, index) => (
+                            <motion.div 
+                                key={index}
+                                variants={cardVariants}
+                                className="flex-shrink-0 w-[280px] md:w-[320px] snap-center"
                             >
-                                <Card className="group relative overflow-hidden p-6 md:p-8 rounded-2xl w-full h-full transition-all duration-300 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 transform-gpu">
-                                    <motion.div 
-                                        className="absolute inset-0 opacity-0 group-hover:opacity-10 bg-gradient-to-br from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500"
-                                        initial={{ rotate: 0 }}
-                                        whileHover={{ 
-                                            rotate: 180,
-                                            transition: { duration: 20, repeat: Infinity, ease: "linear" }
-                                        }}
-                                    />
-                                    
-                                    <div className="relative z-10">
+                                <motion.div
+                                    whileHover={{ 
+                                        scale: 1.05,
+                                        rotateY: 5,
+                                        translateZ: 20,
+                                        transition: { duration: 0.3 }
+                                    }}
+                                    className="h-full"
+                                >
+                                    <Card className="group relative overflow-hidden p-6 md:p-8 rounded-2xl w-full h-full transition-all duration-300 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 transform-gpu">
                                         <motion.div 
-                                            variants={floatingAnimation}
-                                            initial="initial"
-                                            animate="animate"
-                                            className="text-4xl mb-4 md:mb-6 opacity-90 dark:opacity-80"
-                                        >
-                                            {card.icon}
-                                        </motion.div>
+                                            className="absolute inset-0 opacity-0 group-hover:opacity-10 bg-gradient-to-br from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500"
+                                            initial={{ rotate: 0 }}
+                                            whileHover={{ 
+                                                rotate: 180,
+                                                transition: { duration: 20, repeat: Infinity, ease: "linear" }
+                                            }}
+                                        />
                                         
-                                        <motion.h3 
-                                            className="text-lg md:text-xl font-semibold mb-2 md:mb-4 bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent"
-                                            whileHover={{ scale: 1.05 }}
-                                        >
-                                            {card.title}
-                                        </motion.h3>
-                                        
-                                        <p className="text-xs md:text-sm mb-4 md:mb-6 leading-relaxed text-gray-600 dark:text-gray-300">
-                                            {card.description}
-                                        </p>
-                                        
-                                        {card.link && (
-                                            <Link href={card.link}>
-                                                <motion.span 
-                                                    whileHover={{ x: 10 }}
-                                                    className="text-xs md:text-sm font-medium text-purple-600 dark:text-orange-400 hover:text-purple-500 dark:hover:text-orange-300 flex items-center gap-2 cursor-pointer"
-                                                >
-                                                    Learn more
+                                        <div className="relative z-10">
+                                            <motion.div 
+                                                variants={floatingAnimation}
+                                                initial="initial"
+                                                animate="animate"
+                                                className="text-4xl mb-4 md:mb-6 opacity-90 dark:opacity-80"
+                                            >
+                                                {card.icon}
+                                            </motion.div>
+                                            
+                                            <motion.h3 
+                                                className="text-lg md:text-xl font-semibold mb-2 md:mb-4 bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent"
+                                                whileHover={{ scale: 1.05 }}
+                                            >
+                                                {card.title}
+                                            </motion.h3>
+                                            
+                                            <p className="text-xs md:text-sm mb-4 md:mb-6 leading-relaxed text-gray-600 dark:text-gray-300">
+                                                {card.description}
+                                            </p>
+                                            
+                                            {card.link && (
+                                                <Link href={card.link}>
                                                     <motion.span 
-                                                        className="text-lg"
-                                                        animate={{ x: [0, 5, 0] }}
-                                                        transition={{ 
-                                                            duration: 1.5, 
-                                                            repeat: Infinity,
-                                                            ease: "easeInOut" 
-                                                        }}
+                                                        whileHover={{ x: 10 }}
+                                                        className="text-xs md:text-sm font-medium text-purple-600 dark:text-orange-400 hover:text-purple-500 dark:hover:text-orange-300 flex items-center gap-2 cursor-pointer"
                                                     >
-                                                        →
+                                                        Learn more
+                                                        <motion.span 
+                                                            className="text-lg"
+                                                            animate={{ x: [0, 5, 0] }}
+                                                            transition={{ 
+                                                                duration: 1.5, 
+                                                                repeat: Infinity,
+                                                                ease: "easeInOut" 
+                                                            }}
+                                                        >
+                                                            →
+                                                        </motion.span>
                                                     </motion.span>
-                                                </motion.span>
-                                            </Link>
-                                        )}
-                                    </div>
-                                </Card>
+                                                </Link>
+                                            )}
+                                        </div>
+                                    </Card>
+                                </motion.div>
                             </motion.div>
-                        </motion.div>
-                    ))}
+                        ))}
+                    </div>
                 </motion.div>
             </div>
         </motion.section>
