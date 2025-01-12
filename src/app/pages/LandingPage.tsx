@@ -74,7 +74,7 @@ const LandingPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="mb-4 md:mb-6 text-3xl md:text-6xl pb-1 font-bold text-center bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent leading-tight"
+              className="mb-4 md:mb-6 text-3xl md:text-6xl pb-2 font-bold text-center bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent leading-tight"
             >
               Healing Connections, <br />Rebuilding Bonds
             </motion.h1>
