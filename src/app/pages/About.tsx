@@ -218,22 +218,6 @@ const AboutPage = () => {
         </div>
       </motion.div>
 
-      {/* Floating Action Button */}
-      <motion.div 
-        className="fixed bottom-8 right-8 z-50"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 260, damping: 20 }}
-      >
-        <motion.button 
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          className="px-6 py-3 rounded-full shadow-lg flex items-center gap-2 bg-purple-600 dark:bg-orange-500 text-white hover:bg-purple-700 dark:hover:bg-orange-600"
-        >
-          <span className="text-lg">💌</span>
-          <span className="font-medium">Contact Us</span>
-        </motion.button>
-      </motion.div>
 
       <Footer />
     </div>

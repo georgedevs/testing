@@ -9,8 +9,8 @@ import Heading from '@/components/Heading';
 
 export default function Home() {
   return (
-    <div className="overflow-x-hidden">
-     <Heading
+    <main className="">
+      <Heading
         title='MiCounselor'
         description='MiCounselor is a platform that provides anonymous marriage and relationship counseling'
         keywords='Counseling, Therapy, MiCounselor, Marriage'
@@ -20,6 +20,6 @@ export default function Home() {
       <AfterCard />
       <AfterTestimonial />
       <Footer />
-    </div>
+    </main>
   );
 }
