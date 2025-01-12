@@ -23,6 +23,39 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+useEffect(() => {
+  setMounted(true);
+}, []);
+
+const ThemeToggleButton = ({ className = '', showIcon = true }) => (
+  <motion.button 
+    whileHover={{ scale: 1.1 }}
+    whileTap={{ scale: 0.9 }}
+    onClick={toggleTheme}
+    className={`flex items-center justify-center transition-all duration-300
+      bg-purple-500/20 dark:bg-orange-500/20 
+      text-purple-600 dark:text-orange-300
+      hover:bg-purple-500/30 dark:hover:bg-orange-500/30
+      ${className}`}
+    aria-label="Toggle theme"
+  >
+    {mounted && showIcon && (
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={theme}
+          initial={{ rotate: -180, opacity: 0 }}
+          animate={{ rotate: 0, opacity: 1 }}
+          exit={{ rotate: 180, opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {theme === 'dark' ? <Sun size={24} /> : <Moon size={24} />}
+        </motion.div>
+      </AnimatePresence>
+    )}
+  </motion.button>
+);
 
   const currentYear = new Date().getFullYear();
 
@@ -114,14 +147,7 @@ const Header = () => {
 </div>
           {/* Mobile Menu Button */}
           <div className="flex items-center gap-4 md:hidden">
-            <motion.button 
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={toggleTheme}
-              className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 bg-purple-500/20 dark:bg-orange-500/20 text-purple-600 dark:text-orange-300 hover:bg-purple-500/30 dark:hover:bg-orange-500/30"
-            >
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-            </motion.button>
+          <ThemeToggleButton className="w-10 h-10 rounded-full" />
             
             <motion.button
               ref={menuButtonRef}
@@ -214,27 +240,7 @@ const Header = () => {
             ))}
             
             {/* Desktop Theme Toggle with Animation */}
-            <motion.button 
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={toggleTheme}
-              className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300
-                bg-purple-500/20 dark:bg-orange-500/20 
-                text-purple-600 dark:text-orange-300
-                hover:bg-purple-500/30 dark:hover:bg-orange-500/30"
-            >
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={theme}
-                  initial={{ rotate: -180, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: 180, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {theme === 'dark' ? <Sun size={24} /> : <Moon size={24} />}
-                </motion.div>
-              </AnimatePresence>
-            </motion.button>
+            <ThemeToggleButton className="w-10 h-10 rounded-full" />
 
             {/* Get Started Button with Animation */}
             <motion.button 
