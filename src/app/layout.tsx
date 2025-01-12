@@ -5,6 +5,7 @@ import { Providers } from "./provider";
 import Script from "next/script";
 import { SocketProvider } from "@/components/SocketProvider";
 import { type ReactNode } from 'react';
+import LoadingScreen from "@/components/LoadingScreen";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       >
         <Providers>
           <SocketProvider>
+            <LoadingScreen/>
             {children}
           </SocketProvider>
           <Script 
