@@ -8,7 +8,6 @@ import Header from "@/components/Header";
 import { useLoginMutation } from "@/redux/feautures/auth/authApi";
 import { useRouter } from "next/navigation";
 import ForgotPasswordModal from "@/components/ForgotPasswordModal";
-import GoogleAuthButton from "@/components/GoogleAuthButton ";
 import { useAuth } from "../hooks/useAuth";
 import { AnimatePresence, motion } from "framer-motion";
 
