@@ -9,7 +9,7 @@ import Heading from '@/components/Heading';
 
 export default function Home() {
   return (
-    <main className="">
+    <main className="max-sm:overflow-x-hidden">
       <Heading
         title='MiCounselor'
         description='MiCounselor is a platform that provides anonymous marriage and relationship counseling'
