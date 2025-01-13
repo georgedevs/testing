@@ -35,7 +35,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <Providers>
           <SocketProvider>
             <LoadingScreen/>
-            {children}
+            {children} 
           </SocketProvider>
           <Script 
             src="https://unpkg.com/@daily-co/daily-js" 
