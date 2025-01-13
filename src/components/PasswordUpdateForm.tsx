@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/collapsible"
 import { toast } from 'sonner';
 import { useUpdatePasswordMutation } from '@/redux/feautures/auth/authApi';
+import PasswordValidator from '@/components/PasswordValidator';
 
 const CollapsiblePasswordForm = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,7 +35,14 @@ const CollapsiblePasswordForm = () => {
     validationSchema: Yup.object({
       oldPassword: Yup.string().required('Current password is required'),
       newPassword: Yup.string()
-        .min(6, 'Password must be at least 6 characters')
+        .min(8, 'Password must be at least 8 characters')
+        .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+        .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
+        .matches(/[0-9]/, 'Password must contain at least one number')
+        .matches(
+          /[!@#$%^&*(),.?":{}|<>]/,
+          'Password must contain at least one special character'
+        )
         .required('New password is required'),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref('newPassword')], 'Passwords must match')
@@ -56,7 +64,7 @@ const CollapsiblePasswordForm = () => {
     },
   });
 
-  const togglePasswordVisibility = (field:any) => {
+  const togglePasswordVisibility = (field: 'old' | 'new') => {
     if (field === 'old') {
       setShowOldPassword(!showOldPassword);
     } else {
@@ -136,6 +144,12 @@ const CollapsiblePasswordForm = () => {
                 {formik.touched.newPassword && formik.errors.newPassword && (
                   <p className="text-sm text-red-500">{formik.errors.newPassword}</p>
                 )}
+                
+                {/* Password Validator Component */}
+                <PasswordValidator 
+                  password={formik.values.newPassword}
+                  className="mt-2"
+                />
               </div>
 
               <div className="space-y-2">

@@ -9,6 +9,7 @@ import { Mail, Lock, Eye, EyeOff, User, Loader2, Shield } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { useRegisterMutation } from '@/redux/feautures/auth/authApi';
 import VerificationModal from '@/components/VerificationModal';
+import PasswordValidator from '@/components/PasswordValidator';
 import { toast } from 'sonner';
 import Header from '@/components/Header';
 import Heading from '@/components/Heading';
@@ -19,8 +20,13 @@ const validationSchema = Yup.object().shape({
     .required('Email is required'),
   password: Yup.string()
     .min(8, 'Password must be at least 8 characters')
-    .matches(/[a-zA-Z]/, 'Password must contain at least one letter')
+    .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
     .matches(/[0-9]/, 'Password must contain at least one number')
+    .matches(
+      /[!@#$%^&*(),.?":{}|<>]/,
+      'Password must contain at least one special character'
+    )
     .required('Password is required'),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref('password')], 'Passwords must match')
@@ -179,6 +185,10 @@ const RegistrationForm = () => {
                   {showPassword ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                 </button>
               </div>
+              <PasswordValidator 
+                password={formik.values.password}
+                className="mt-2"
+              />
               {formik.touched.password && formik.errors.password && (
                 <p className="text-red-500 dark:text-red-400 text-xs mt-1">{formik.errors.password}</p>
               )}

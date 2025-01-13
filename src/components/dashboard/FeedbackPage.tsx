@@ -127,13 +127,13 @@ const FeedbackPage = () => {
                 <Card key={session.id} className="p-4 hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-4">
                     <Avatar className="w-12 h-12">
-                      <AvatarImage src={session.counselorAvatar} alt={session.counselorName} />
+                      <AvatarImage src={session.counselorAvatar} alt={"Anonymous Counselor"} />
                       <AvatarFallback>{session.counselorName[0]}</AvatarFallback>
                     </Avatar>
                     
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-lg">{session.counselorName}</h3>
+                        <h3 className="font-semibold text-lg">{"Anonymous Counselor"}</h3>
                         <Button 
                           variant={isRated ? "secondary" : "outline"}
                           onClick={() => !isRated && setSelectedSession(session.id)}
