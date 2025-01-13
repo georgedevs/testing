@@ -209,7 +209,7 @@ const SessionPage = () => {
     const sessionStart = subMinutes(meetingDateTime, 5);
     
     if (now < sessionStart) {
-      return 'Please wait 5 minutes before session';
+      return 'Please wait 5 minutes before';
     }
     
     if (now > addMinutes(meetingDateTime, 45)) {
