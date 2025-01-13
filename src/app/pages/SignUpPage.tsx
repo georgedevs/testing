@@ -100,7 +100,6 @@ const SignupPage = () => {
   };
   
   const formRef = React.useRef(null);
-  const isInView = useInView(formRef, { once: true, margin: "-100px" });
 
   const privacyFeatures = [
     {
@@ -190,7 +189,7 @@ const SignupPage = () => {
       <motion.div 
         className="container mx-auto px-4 py-12"
         initial="hidden"
-        whileInView="visible"
+         animate="visible"
         viewport={{ once: false, amount: 0.3 }}
         variants={containerVariants}
       >
@@ -223,7 +222,7 @@ const SignupPage = () => {
               className="lg:order-2"
               variants={scrollVariants}
               initial="hidden"
-              whileInView="visible"
+               animate="visible"
               viewport={{ once: false, amount: 0.3 }}
             >
               <Card 
@@ -459,7 +458,7 @@ const SignupPage = () => {
                   key={index}
                   variants={fadeInUp}
                   initial="hidden"
-                  whileInView="visible"
+                   animate="visible"
                   viewport={{ once: false, amount: 0.3 }}
                   whileHover={{ 
                     scale: 1.03,
