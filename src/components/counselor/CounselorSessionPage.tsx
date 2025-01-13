@@ -98,7 +98,7 @@ const CounselorSessionPage = () => {
     setError('');
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/booking/meeting-token/${activeSession.booking._id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/meeting-token/${activeSession.booking._id}`, {
         credentials: 'include'
       });
       
@@ -153,7 +153,7 @@ const CounselorSessionPage = () => {
       }
       
       if (activeSession?.booking?._id) {
-        await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/booking/complete/${activeSession.booking._id}`, {
+        await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/complete/${activeSession.booking._id}`, {
           method: 'POST',
           credentials: 'include'
         });
