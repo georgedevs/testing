@@ -51,8 +51,15 @@ const Footer = () => {
     }
   };
 
-  const quickLinks = ['Home', 'About Us', 'Stories', 'Resources', 'Services'];
-  const phoneNumber = "2348032035563"; // Remove + and format for WhatsApp
+  const quickLinks = [
+    { name: 'Home', path: '/' },
+    { name: 'About Us', path: '/about' },
+    { name: 'Stories', path: '/stories' },
+    { name: 'Resources', path: '/resources/stuck-relationships' },
+    { name: 'Services', path: '/services' }
+  ];
+  
+  const phoneNumber = "2348032035563";
 
   return (
     <motion.footer
@@ -104,15 +111,15 @@ const Footer = () => {
             <div className="grid grid-cols-2 gap-4">
               {quickLinks.map((link, index) => (
                 <motion.a
-                  key={link}
-                  href="#"
+                  key={link.name}
+                  href={link.path}
                   initial={{ x: -20, opacity: 0 }}
                   animate={isInView ? { x: 0, opacity: 1 } : { x: -20, opacity: 0 }}
                   transition={{ delay: index * 0.1 }}
                   whileHover={{ scale: 1.05, x: 10 }}
                   className="text-sm text-gray-600 hover:text-purple-600 dark:text-gray-300 dark:hover:text-orange-400 transition-colors duration-300"
                 >
-                  {link}
+                  {link.name}
                 </motion.a>
               ))}
             </div>

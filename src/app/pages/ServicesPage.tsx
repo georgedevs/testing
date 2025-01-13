@@ -48,7 +48,7 @@ const ServicesPage = () => {
 
   const serviceTypes = [
     {
-      icon: <HeartHandshake size={48} />,
+      icon: <HeartHandshake className="text-purple-600 dark:text-orange-400" size={48} />,
       title: "Couples Counseling",
       description: "Comprehensive therapy to strengthen relationship bonds, resolve conflicts, and rebuild communication.",
       features: [
@@ -58,7 +58,7 @@ const ServicesPage = () => {
       ]
     },
     {
-      icon: <MessageCircle size={48} />,
+      icon: <MessageCircle className="text-purple-600 dark:text-orange-400" size={48} />,
       title: "Online Chat Counseling",
       description: "Convenient text-based counseling for couples seeking flexible support from home.",
       features: [
@@ -68,7 +68,7 @@ const ServicesPage = () => {
       ]
     },
     {
-      icon: <PhoneCall size={48} />,
+      icon: <PhoneCall className="text-purple-600 dark:text-orange-400" size={48} />,
       title: "Phone Counseling",
       description: "Voice-based counseling for those preferring audio communication.",
       features: [
@@ -166,13 +166,9 @@ const ServicesPage = () => {
                 transition={{ type: "spring", stiffness: 300 }}
               >
                 <Card className="p-6 md:p-8 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
-                  <motion.div 
-                    className="mb-4 text-purple-600 dark:text-orange-400"
-                    whileHover={{ scale: 1.1, rotate: 360 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
+                  <div className="mb-4">
                     {service.icon}
-                  </motion.div>
+                  </div>
                   <h3 className="text-lg md:text-xl font-semibold mb-3 md:mb-4 bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent">
                     {service.title}
                   </h3>
