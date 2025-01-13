@@ -16,6 +16,7 @@ const baseQuery = fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_SERVER_URL,
     credentials: 'include',
     prepareHeaders: (headers) => {
+        headers.set('Accept', 'application/json');
         return headers;
     },
 });
