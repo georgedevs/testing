@@ -114,22 +114,22 @@ const VerificationModal: FC<Props> = ({ isOpen, onClose, email }) => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-0 sm:p-4"
                 >
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.9, opacity: 0 }}
-                        className="w-full max-w-md"
+                        className="w-full h-full sm:h-auto sm:max-w-md"
                     >
-                        <Card className="sm:max-w-md w-[95%] mx-auto rounded-3xl border-0 shadow-2xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-purple-200/20 dark:shadow-orange-900/20 p-8">
+                        <Card className="w-full h-full sm:h-auto sm:w-full rounded-none sm:rounded-3xl border-0 shadow-2xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-purple-200/20 dark:shadow-orange-900/20 p-4 sm:p-8">
                             {isActivated ? (
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     className="text-center"
                                 >
-                                    <div className="relative mx-auto w-20 h-20 mb-6">
+                                    <div className="relative mx-auto w-16 sm:w-20 h-16 sm:h-20 mb-4 sm:mb-6">
                                         <svg className="w-full h-full" viewBox="0 0 100 100">
                                             <circle
                                                 className="stroke-purple-100 dark:stroke-orange-900/30"
@@ -152,13 +152,13 @@ const VerificationModal: FC<Props> = ({ isOpen, onClose, email }) => {
                                             />
                                         </svg>
                                         <div className="absolute inset-0 flex items-center justify-center">
-                                            <Check className="w-8 h-8 text-purple-600 dark:text-orange-500" />
+                                            <Check className="w-6 sm:w-8 h-6 sm:h-8 text-purple-600 dark:text-orange-500" />
                                         </div>
                                     </div>
-                                    <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
+                                    <h2 className="text-xl sm:text-2xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
                                         Account Activated!
                                     </h2>
-                                    <p className="text-gray-500 dark:text-gray-400">
+                                    <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">
                                         Redirecting you to login in {Math.ceil((100 - redirectProgress) / 50)} seconds...
                                     </p>
                                 </motion.div>
@@ -168,15 +168,15 @@ const VerificationModal: FC<Props> = ({ isOpen, onClose, email }) => {
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: 0.3 }}
-                                        className="text-center mb-8"
+                                        className="text-center mb-6 sm:mb-8"
                                     >
-                                        <div className="mx-auto bg-gradient-to-br from-purple-100 to-orange-100 dark:from-orange-900/30 dark:to-purple-900/30 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
-                                            <Check className="w-8 h-8 text-purple-600 dark:text-orange-500" />
+                                        <div className="mx-auto bg-gradient-to-br from-purple-100 to-orange-100 dark:from-orange-900/30 dark:to-purple-900/30 w-12 sm:w-16 h-12 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-6">
+                                            <Check className="w-6 sm:w-8 h-6 sm:h-8 text-purple-600 dark:text-orange-500" />
                                         </div>
-                                        <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
+                                        <h2 className="text-2xl sm:text-3xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent">
                                             Verify Your Account
                                         </h2>
-                                        <p className="text-gray-500 dark:text-gray-400">
+                                        <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">
                                             Enter the 6-digit code sent to {email}
                                         </p>
                                     </motion.div>
@@ -185,7 +185,7 @@ const VerificationModal: FC<Props> = ({ isOpen, onClose, email }) => {
                                         <motion.div
                                             initial={{ opacity: 0, y: -10 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            className="p-4 rounded-2xl text-sm bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-200 border border-red-100 dark:border-red-800 mb-6"
+                                            className="p-3 sm:p-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-200 border border-red-100 dark:border-red-800 mb-4 sm:mb-6"
                                         >
                                             {verificationError}
                                         </motion.div>
@@ -195,7 +195,7 @@ const VerificationModal: FC<Props> = ({ isOpen, onClose, email }) => {
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: 0.4 }}
-                                        className="flex justify-center space-x-3 mb-8"
+                                        className="flex justify-center space-x-2 sm:space-x-3 mb-6 sm:mb-8"
                                     >
                                         {Object.keys(verifyNumber).map((key, index) => (
                                             <input
@@ -208,7 +208,7 @@ const VerificationModal: FC<Props> = ({ isOpen, onClose, email }) => {
                                                 disabled={isLoading}
                                                 value={verifyNumber[key as keyof VerifyNumber]}
                                                 onChange={(e) => handleInputChange(index, e.target.value)}
-                                                className={`w-12 h-12 text-center text-xl font-bold rounded-2xl
+                                                className={`w-10 h-10 sm:w-12 sm:h-12 text-center text-lg sm:text-xl font-bold rounded-xl sm:rounded-2xl
                                                     bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white 
                                                     border border-gray-200 dark:border-gray-700 
                                                     group-hover:border-purple-500 dark:group-hover:border-orange-500 
@@ -229,13 +229,13 @@ const VerificationModal: FC<Props> = ({ isOpen, onClose, email }) => {
                                         whileTap={{ scale: isLoading ? 1 : 0.98 }}
                                         onClick={verificationHandler}
                                         disabled={isLoading}
-                                        className={`w-full py-4 rounded-2xl text-base font-semibold transition-all duration-300 
+                                        className={`w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl text-sm sm:text-base font-semibold transition-all duration-300 
                                             bg-gradient-to-r from-purple-600 to-orange-500 hover:from-purple-700 hover:to-orange-600 
                                             dark:from-orange-500 dark:to-purple-500 dark:hover:from-orange-600 dark:hover:to-purple-600 
                                             text-white disabled:opacity-50 focus:outline-none focus:ring-4 
                                             focus:ring-purple-500/20 dark:focus:ring-orange-500/20 
                                             flex items-center justify-center gap-2 
-                                            disabled:cursor-not-allowed group mb-6 relative`}
+                                            disabled:cursor-not-allowed group mb-4 sm:mb-6 relative`}
                                     >
                                         <span className={isLoading ? 'invisible' : ''}>
                                             Verify Code
@@ -251,16 +251,16 @@ const VerificationModal: FC<Props> = ({ isOpen, onClose, email }) => {
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                         transition={{ delay: 0.5 }}
-                                        className="flex items-center justify-center space-x-2"
+                                        className="flex items-center justify-center"
                                     >
                                         <button
                                             onClick={onClose}
                                             disabled={isLoading}
-                                            className={`flex items-center text-sm text-gray-500 dark:text-gray-400 
+                                            className={`flex items-center text-xs sm:text-sm text-gray-500 dark:text-gray-400 
                                                 hover:text-purple-500 dark:hover:text-orange-500 transition-colors 
                                                 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''} group`}
                                         >
-                                            <ArrowLeft className="w-4 h-4 mr-1 transition-transform duration-300 group-hover:-translate-x-1" />
+                                            <ArrowLeft className="w-3 sm:w-4 h-3 sm:h-4 mr-1 transition-transform duration-300 group-hover:-translate-x-1" />
                                             Back to Sign Up
                                         </button>
                                     </motion.div>
