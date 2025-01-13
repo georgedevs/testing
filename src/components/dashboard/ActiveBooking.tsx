@@ -8,6 +8,7 @@ import {
   MapPin,
   MessageCircle,
   User,
+  Video,
   X
 } from 'lucide-react';
 import {
@@ -37,8 +38,10 @@ import {
 import { useGetActiveBookingQuery, useGetAvailableTimeSlotsQuery, useSelectMeetingTimeMutation, useCancelBookingMutation } from '@/redux/feautures/booking/bookingApi';
 import { useSocket } from '../SocketProvider';
 import BookingProgress from './BookingProgress';
+import { useRouter } from 'next/navigation';
 
 export default function ActiveBooking() {
+  const router = useRouter();
   const socket = useSocket();
   const { data: activeBooking, isLoading,refetch } = useGetActiveBookingQuery();
   const [selectTime] = useSelectMeetingTimeMutation();
@@ -129,6 +132,11 @@ export default function ActiveBooking() {
     setSelectedTime(undefined);
   };
 
+  const handleJoinSession = () => {
+    router.push('/dashboard/sessions');
+  };
+
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -207,10 +215,19 @@ export default function ActiveBooking() {
           </div>
         )}
 
-        <div className="flex gap-4 pt-4">
+<div className="flex gap-4 pt-4">
           {canSelectTime && (
             <Button onClick={() => setShowTimeSelection(true)}>
               Select Time
+            </Button>
+          )}
+          {booking.status === 'confirmed' && (
+            <Button 
+              onClick={handleJoinSession}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <Video className="w-4 h-4 mr-2" />
+              Join Session
             </Button>
           )}
           <Button
