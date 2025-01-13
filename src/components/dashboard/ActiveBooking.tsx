@@ -133,7 +133,7 @@ export default function ActiveBooking() {
   };
 
   const handleJoinSession = () => {
-    router.push('/dashboard/sessions');
+    router.push('/dashboard/session');
   };
 
 
