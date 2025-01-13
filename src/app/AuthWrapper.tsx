@@ -15,7 +15,8 @@ const publicRoutes = [
     '/services',
     '/regcounselor',
     '/resources',
-    '/resources/*'
+    '/resources/*',
+    '/stories'
 ];
 
 export default function AuthWrapper({
