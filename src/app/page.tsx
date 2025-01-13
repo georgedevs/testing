@@ -10,7 +10,7 @@ import ScrollToTop from '@/components/ScrollToTop';
 
 export default function Home() {
   return (
-    <main className="max-sm:overflow-x-hidden">
+    <main className="">
       <Heading
         title='MiCounselor'
         description='MiCounselor is a platform that provides anonymous marriage and relationship counseling'
