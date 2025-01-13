@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import ForgotPasswordModal from "@/components/ForgotPasswordModal";
 import { useAuth } from "../hooks/useAuth";
 import { AnimatePresence, motion } from "framer-motion";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const validationSchema = Yup.object({
   email: Yup.string()
@@ -62,13 +63,7 @@ const SigninPage = () => {
 
   if (authLoading) {
     return (
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="h-screen flex items-center justify-center dark:bg-gray-900 bg-gray-50"
-      >
-        <Loader2 className="w-8 h-8 animate-spin text-purple-600 dark:text-orange-400" />
-      </motion.div>
+      <LoadingScreen/>
     );
   }
 
