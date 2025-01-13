@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { ChevronDown, Menu, X, Sun, Moon } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -15,21 +15,21 @@ type NavigationItem = {
   dropdown?: DropdownItem[];
 };
 
-const Header = () => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const { theme, setTheme } = useTheme();
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
-  const [mounted, setMounted] = useState(false);
+interface ThemeToggleButtonProps {
+  className?: string;
+  showIcon?: boolean;
+  theme?: string;
+  toggleTheme: () => void;
+  mounted: boolean;
+}
 
-useEffect(() => {
-  setMounted(true);
-}, []);
-
-const ThemeToggleButton = ({ className = '', showIcon = true }) => (
+const ThemeToggleButton = memo(({ 
+  className = '', 
+  showIcon = true, 
+  theme, 
+  toggleTheme, 
+  mounted 
+}: ThemeToggleButtonProps) => (
   <motion.button 
     whileHover={{ scale: 1.1 }}
     whileTap={{ scale: 0.9 }}
@@ -55,7 +55,24 @@ const ThemeToggleButton = ({ className = '', showIcon = true }) => (
       </AnimatePresence>
     )}
   </motion.button>
-);
+));
+
+ThemeToggleButton.displayName = 'ThemeToggleButton';
+
+const Header = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+useEffect(() => {
+  setMounted(true);
+}, []);
+
 
   const currentYear = new Date().getFullYear();
 
@@ -147,7 +164,12 @@ const ThemeToggleButton = ({ className = '', showIcon = true }) => (
 </div>
           {/* Mobile Menu Button */}
           <div className="flex items-center gap-4 md:hidden">
-          <ThemeToggleButton className="w-10 h-10 rounded-full" />
+          <ThemeToggleButton 
+  className="w-10 h-10 rounded-full"
+  theme={theme}
+  toggleTheme={toggleTheme}
+  mounted={mounted}
+/>
             
             <motion.button
               ref={menuButtonRef}
@@ -240,7 +262,12 @@ const ThemeToggleButton = ({ className = '', showIcon = true }) => (
             ))}
             
             {/* Desktop Theme Toggle with Animation */}
-            <ThemeToggleButton className="w-10 h-10 rounded-full" />
+            <ThemeToggleButton 
+  className="w-10 h-10 rounded-full"
+  theme={theme}
+  toggleTheme={toggleTheme}
+  mounted={mounted}
+/>
 
             {/* Get Started Button with Animation */}
             <motion.button 
