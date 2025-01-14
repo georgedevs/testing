@@ -77,7 +77,7 @@ useEffect(() => {
   const currentYear = new Date().getFullYear();
 
   const handleGetStarted = () => {
-    router.push('/signup');
+    router.push('/signin');
     setIsMobileMenuOpen(false);
   };
 
