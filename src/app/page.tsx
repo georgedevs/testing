@@ -10,18 +10,35 @@ import ScrollToTop from '@/components/ScrollToTop';
 
 export default function Home() {
   return (
-    <main className="">
+    <div className="relative w-full overflow-hidden">
+    <main className="w-full">
       <Heading
-        title='MiCounselor'
-        description='MiCounselor is a platform that provides anonymous marriage and relationship counseling'
-        keywords='Counseling, Therapy, MiCounselor, Marriage'
+        title="MiCounselor"
+        description="MiCounselor is a platform that provides anonymous marriage and relationship counseling"
+        keywords="Counseling, Therapy, MiCounselor, Marriage"
       />
-      <ScrollToTop/>
-      <LandingPage />
-      <RelationshipCards />
-      <AfterCard />
-      <AfterTestimonial />
-      <Footer />
+      <ScrollToTop />
+      
+      <div className="relative w-full">
+        <LandingPage />
+      </div>
+      
+      <div className="relative w-full">
+        <RelationshipCards />
+      </div>
+      
+      <div className="relative w-full">
+        <AfterCard />
+      </div>
+      
+      <div className="relative w-full">
+        <AfterTestimonial />
+      </div>
+      
+      <div className="relative w-full">
+        <Footer />
+      </div>
     </main>
-  );
+  </div>
+);
 }

@@ -129,7 +129,7 @@ const RelationshipCards = () => {
         <motion.section 
             ref={containerRef}
             style={{ opacity, scale, y }}
-            className="relative py-16 px-4 md:px-16 bg-gray-50 dark:bg-gray-800 transition-colors duration-300 w-full overflow-hidden"
+            className="relative py-16 px-4 md:px-16 bg-gray-50 dark:bg-gray-800 transition-colors duration-300"
         >
             <div className="container mx-auto">
                 <motion.h2 
