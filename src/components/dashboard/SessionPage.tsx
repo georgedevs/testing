@@ -3,7 +3,6 @@ import { useRouter } from 'next/navigation';
 import { format, isWithinInterval, parseISO, subMinutes, addMinutes } from 'date-fns';
 import { Loader2 } from 'lucide-react';
 import Script from 'next/script';
-import { toast } from 'sonner';
 import {
   Card,
   CardContent,
@@ -14,14 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useGetActiveBookingQuery } from '@/redux/feautures/booking/bookingApi';
-import { useSocket } from '@/components/SocketProvider';
-
-interface DailyCallFrame {
-  join: (options: { url: string; token: string }) => Promise<void>;
-  leave: () => Promise<void>;
-  destroy: () => Promise<void>;
-  on: (event: string, callback: (...args: any[]) => void) => DailyCallFrame;
-}
+import { useSocket } from '../SocketProvider';
 
 const SessionPage = () => {
   const router = useRouter();
@@ -30,12 +22,45 @@ const SessionPage = () => {
   const [error, setError] = useState('');
   const [isJoining, setIsJoining] = useState(false);
   const [isDailyLoaded, setIsDailyLoaded] = useState(false);
-  const [callFrame, setCallFrame] = useState<DailyCallFrame | null>(null);
+  const [callFrame, setCallFrame] = useState(null);
 
-  // Socket event handling for real-time updates
+
+  useEffect(() => {
+    if (!callFrame || !activeBooking?.booking?.meetingDate || !activeBooking?.booking?.meetingTime) return;
+
+    const meetingDateTime = parseMeetingDateTime(activeBooking.booking);
+    if (!meetingDateTime) return;
+
+    const sessionEndTime = addMinutes(meetingDateTime, 45);
+    const now = new Date().getTime();
+    const timeUntilEnd = sessionEndTime.getTime() - now;
+    const timeUntilWarning = timeUntilEnd - (5 * 60 * 1000); // 5 minutes before end
+
+    if (timeUntilEnd <= 0) {
+      handleEndCall();
+      return;
+    }
+
+    // Set warning timer
+    const warningTimer = setTimeout(() => {
+      showEndingWarning();
+    }, timeUntilWarning);
+
+    // Set end call timer
+    const endCallTimer = setTimeout(() => {
+      handleEndCall();
+    }, timeUntilEnd);
+
+    return () => {
+      clearTimeout(warningTimer);
+      clearTimeout(endCallTimer);
+    };
+  }, [callFrame, activeBooking?.booking]);
+  
   useEffect(() => {
     if (!socket) return;
 
+    // Handle booking updates
     const handleBookingUpdate = () => {
       refetch();
     };
@@ -47,7 +72,53 @@ const SessionPage = () => {
     };
   }, [socket, refetch]);
 
-  // Call frame event listeners
+  const handleDailyLoad = () => {
+    setIsDailyLoaded(true);
+  };
+
+  const showEndingWarning = () => {
+    if (callFrame) {
+      setShowWarning(true);
+      // Send a system message to all participants
+      callFrame.sendMessage({
+        message: "⚠️ Session will end in 5 minutes",
+        name: "System"
+      });
+    }
+  };
+
+  const parseMeetingDateTime = (meeting: any) => {
+    try {
+      if (!meeting?.meetingDate || !meeting?.meetingTime) return null;
+
+      const dateValue = typeof meeting.meetingDate === 'string' 
+        ? meeting.meetingDate.includes('T') 
+          ? parseISO(meeting.meetingDate)  
+          : new Date(meeting.meetingDate)  
+        : new Date(meeting.meetingDate);   
+
+      if (isNaN(dateValue.getTime())) return null;
+
+      const dateStr = format(dateValue, 'yyyy-MM-dd');
+      const dateTimeStr = `${dateStr}T${meeting.meetingTime}`;
+      return new Date(dateTimeStr);
+    } catch (err) {
+      console.error('Error parsing meeting datetime:', err);
+      return null;
+    }
+  };
+
+  const isWithinSessionWindow = (meetingDateTime: any) => {
+    const now = new Date();
+    const sessionStart = subMinutes(meetingDateTime, 5);
+    const sessionEnd = addMinutes(meetingDateTime, 45);
+
+    return isWithinInterval(now, {
+      start: sessionStart,
+      end: sessionEnd
+    });
+  };
+
   useEffect(() => {
     let meetingEndedTimeout: NodeJS.Timeout;
 
@@ -72,46 +143,6 @@ const SessionPage = () => {
       }
     };
   }, [callFrame]);
-
-  // Timer for session end warning and auto-ending call
-  useEffect(() => {
-    if (!callFrame || !activeBooking?.booking?.meetingDate || !activeBooking?.booking?.meetingTime) return;
-
-    const meetingDateTime = parseMeetingDateTime(activeBooking.booking);
-    if (!meetingDateTime) return;
-
-    const sessionEndTime = addMinutes(meetingDateTime, 45);
-    const now = new Date().getTime();
-    const timeUntilEnd = sessionEndTime.getTime() - now;
-    const timeUntilWarning = timeUntilEnd - (5 * 60 * 1000); // 5 minutes before end
-
-    if (timeUntilEnd <= 0) {
-      handleEndCall();
-      return;
-    }
-
-    // Set warning timer
-    const warningTimer = setTimeout(() => {
-      toast.warning('Session will end in 5 minutes', {
-        duration: 10000, // Show for 10 seconds
-        position: 'top-center',
-      });
-    }, timeUntilWarning);
-
-    // Set end call timer
-    const endCallTimer = setTimeout(() => {
-      handleEndCall();
-    }, timeUntilEnd);
-
-    return () => {
-      clearTimeout(warningTimer);
-      clearTimeout(endCallTimer);
-    };
-  }, [callFrame, activeBooking?.booking]);
-
-  const handleDailyLoad = () => {
-    setIsDailyLoaded(true);
-  };
 
   const getMeetingAccess = async () => {
     if (!activeBooking?.booking?._id) {
@@ -155,6 +186,16 @@ const SessionPage = () => {
 
       setCallFrame(frame);
 
+      frame
+        .on('left-meeting', handleEndCall)
+        .on('meeting-ended', () => {
+          setTimeout(handleEndCall, 2000);
+        })
+        .on('error', (e) => {
+          console.error('Daily.co error:', e);
+          setError('Failed to connect to meeting room. Please try refreshing.');
+        });
+
       await frame.join({ 
         url: data.roomUrl, 
         token: data.token
@@ -166,89 +207,6 @@ const SessionPage = () => {
     } finally {
       setIsJoining(false);
     }
-  };
-
-// Replace your existing parseMeetingDateTime function with this:
-const parseMeetingDateTime = (meeting: any) => {
-  try {
-    if (!meeting?.meetingDate || !meeting?.meetingTime) return null;
-
-    // First handle the date part
-    let dateValue: Date;
-    if (typeof meeting.meetingDate === 'string') {
-      // If it's an ISO string with time (contains 'T')
-      if (meeting.meetingDate.includes('T')) {
-        dateValue = parseISO(meeting.meetingDate);
-      } else {
-        // If it's just a date string
-        dateValue = new Date(meeting.meetingDate);
-      }
-    } else {
-      dateValue = new Date(meeting.meetingDate);
-    }
-
-    if (isNaN(dateValue.getTime())) {
-      console.error('Invalid date value');
-      return null;
-    }
-
-    // Format the date part and combine with time
-    const dateStr = format(dateValue, 'yyyy-MM-dd');
-    const dateTimeStr = `${dateStr}T${meeting.meetingTime}`;
-
-    // Create a new date object that will respect the local timezone
-    const localDate = new Date(dateTimeStr);
-
-    // Log times for debugging
-    console.log('Original meeting date:', meeting.meetingDate);
-    console.log('Original meeting time:', meeting.meetingTime);
-    console.log('Parsed local date:', localDate);
-    console.log('Local date ISO string:', localDate.toISOString());
-    console.log('Local timezone offset:', localDate.getTimezoneOffset());
-
-    return localDate;
-  } catch (err) {
-    console.error('Error parsing meeting datetime:', err);
-    return null;
-  }
-};
-
-  const isWithinSessionWindow = (meetingDateTime: Date) => {
-    if (!meetingDateTime) return false;
-    
-    const now = new Date();
-    const sessionStart = subMinutes(meetingDateTime, 5);
-    const sessionEnd = addMinutes(meetingDateTime, 45);
-  
-    // Log times for debugging
-    console.log('Current time:', now);
-    console.log('Session start:', sessionStart);
-    console.log('Meeting time:', meetingDateTime);
-    console.log('Session end:', sessionEnd);
-  
-    return isWithinInterval(now, {
-      start: sessionStart,
-      end: sessionEnd
-    });
-  };
-
-  const getSessionStatus = () => {
-    if (!meetingDateTime) {
-      return 'Error loading session time';
-    }
-    
-    const now = new Date();
-    const sessionStart = subMinutes(meetingDateTime, 5);
-    
-    if (now < sessionStart) {
-      return 'Please wait 5 minutes before';
-    }
-    
-    if (now > addMinutes(meetingDateTime, 45)) {
-      return 'Session has ended';
-    }
-    
-    return 'Session is active';
   };
 
   const handleEndCall = async () => {
@@ -264,7 +222,6 @@ const parseMeetingDateTime = (meeting: any) => {
           credentials: 'include'
         });
       }
-      
       await router.push('/dashboard/history');
 
       setTimeout(() => {
@@ -305,6 +262,25 @@ const parseMeetingDateTime = (meeting: any) => {
   const meeting = activeBooking.booking;
   const meetingDateTime = parseMeetingDateTime(meeting);
   const canJoinMeeting = meetingDateTime ? isWithinSessionWindow(meetingDateTime) : false;
+
+  const getSessionStatus = () => {
+    if (!meetingDateTime) {
+      return 'Error loading session time';
+    }
+    
+    const now = new Date();
+    const sessionStart = subMinutes(meetingDateTime, 5);
+    
+    if (now < sessionStart) {
+      return 'Please wait until 5 minutes before the session';
+    }
+    
+    if (now > addMinutes(meetingDateTime, 45)) {
+      return 'Session has ended';
+    }
+    
+    return 'Session is active';
+  };
 
   return (
     <>

@@ -26,69 +26,38 @@ const CounselorSessionPage = () => {
     setIsDailyLoaded(true);
   };
 
-// Replace your existing parseMeetingDateTime function with this:
-const parseMeetingDateTime = (meeting: any) => {
-  try {
-    if (!meeting?.meetingDate || !meeting?.meetingTime) return null;
+  const parseMeetingDateTime = (meeting:any) => {
+    try {
+      if (!meeting?.meetingDate || !meeting?.meetingTime) return null;
 
-    // First handle the date part
-    let dateValue: Date;
-    if (typeof meeting.meetingDate === 'string') {
-      // If it's an ISO string with time (contains 'T')
-      if (meeting.meetingDate.includes('T')) {
-        dateValue = parseISO(meeting.meetingDate);
-      } else {
-        // If it's just a date string
-        dateValue = new Date(meeting.meetingDate);
-      }
-    } else {
-      dateValue = new Date(meeting.meetingDate);
-    }
+      const dateValue = typeof meeting.meetingDate === 'string' 
+        ? meeting.meetingDate.includes('T') 
+          ? parseISO(meeting.meetingDate)  
+          : new Date(meeting.meetingDate)  
+        : new Date(meeting.meetingDate);   
 
-    if (isNaN(dateValue.getTime())) {
-      console.error('Invalid date value');
+      if (isNaN(dateValue.getTime())) return null;
+
+      const dateStr = format(dateValue, 'yyyy-MM-dd');
+      const dateTimeStr = `${dateStr}T${meeting.meetingTime}`;
+      return new Date(dateTimeStr);
+    } catch (err) {
+      console.error('Error parsing meeting datetime:', err);
       return null;
     }
+  };
 
-    // Format the date part and combine with time
-    const dateStr = format(dateValue, 'yyyy-MM-dd');
-    const dateTimeStr = `${dateStr}T${meeting.meetingTime}`;
-
-    // Create a new date object that will respect the local timezone
-    const localDate = new Date(dateTimeStr);
-
-    // Log times for debugging
-    console.log('Original meeting date:', meeting.meetingDate);
-    console.log('Original meeting time:', meeting.meetingTime);
-    console.log('Parsed local date:', localDate);
-    console.log('Local date ISO string:', localDate.toISOString());
-    console.log('Local timezone offset:', localDate.getTimezoneOffset());
-
-    return localDate;
-  } catch (err) {
-    console.error('Error parsing meeting datetime:', err);
-    return null;
-  }
-};
-
-  const isWithinSessionWindow = (meetingDateTime: Date) => {
-    if (!meetingDateTime) return false;
-    
+  const isWithinSessionWindow = (meetingDateTime:any) => {
     const now = new Date();
     const sessionStart = subMinutes(meetingDateTime, 5);
     const sessionEnd = addMinutes(meetingDateTime, 45);
-  
-    // Log times for debugging
-    console.log('Current time:', now);
-    console.log('Session start:', sessionStart);
-    console.log('Meeting time:', meetingDateTime);
-    console.log('Session end:', sessionEnd);
-  
+
     return isWithinInterval(now, {
       start: sessionStart,
       end: sessionEnd
     });
   };
+
   useEffect(() => {
     let meetingEndedTimeout:any;
 
