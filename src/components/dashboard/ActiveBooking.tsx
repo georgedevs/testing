@@ -214,17 +214,16 @@ export default function ActiveBooking() {
             </p>
           </div>
         )}
-
-<div className="flex gap-4 pt-4">
+ <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 pt-4">
           {canSelectTime && (
-            <Button onClick={() => setShowTimeSelection(true)}>
+            <Button className="w-full sm:w-auto" onClick={() => setShowTimeSelection(true)}>
               Select Time
             </Button>
           )}
           {booking.status === 'confirmed' && (
             <Button 
               onClick={handleJoinSession}
-              className="bg-green-600 hover:bg-green-700"
+              className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
             >
               <Video className="w-4 h-4 mr-2" />
               Join Session
@@ -233,6 +232,7 @@ export default function ActiveBooking() {
           <Button
             variant="destructive"
             onClick={() => setShowCancelDialog(true)}
+            className="w-full sm:w-auto"
           >
             Cancel Booking
           </Button>
