@@ -26,40 +26,38 @@ const CounselorSessionPage = () => {
     setIsDailyLoaded(true);
   };
 
- const parseMeetingDateTime = (meeting: any) => {
-  try {
-    if (!meeting?.meetingDate || !meeting?.meetingTime) return null;
+  const parseMeetingDateTime = (meeting:any) => {
+    try {
+      if (!meeting?.meetingDate || !meeting?.meetingTime) return null;
 
-    // Convert the date to ISO string if it isn't already
-    const dateStr = typeof meeting.meetingDate === 'string' 
-      ? meeting.meetingDate.includes('T') 
-        ? meeting.meetingDate
-        : format(new Date(meeting.meetingDate), 'yyyy-MM-dd')
-      : format(new Date(meeting.meetingDate), 'yyyy-MM-dd');
+      const dateValue = typeof meeting.meetingDate === 'string' 
+        ? meeting.meetingDate.includes('T') 
+          ? parseISO(meeting.meetingDate)  
+          : new Date(meeting.meetingDate)  
+        : new Date(meeting.meetingDate);   
 
-    // Combine date and time
-    const dateTimeStr = `${dateStr}T${meeting.meetingTime}`;
-    
-    // Parse as ISO string and create a new Date
-    // This will automatically handle the conversion to local timezone
-    const localDate = parseISO(dateTimeStr);
-    
-    return localDate;
-  } catch (err) {
-    console.error('Error parsing meeting datetime:', err);
-    return null;
-  }
-};
+      if (isNaN(dateValue.getTime())) return null;
 
- const isWithinSessionWindow = (meetingDateTime: Date) => {
-  if (!meetingDateTime) return false;
-  
-  const now = new Date();
-  const fiveMinutesBefore = new Date(meetingDateTime.getTime() - 5 * 60000);
-  const fortyFiveMinutesAfter = new Date(meetingDateTime.getTime() + 45 * 60000);
-  
-  return now >= fiveMinutesBefore && now <= fortyFiveMinutesAfter;
-};
+      const dateStr = format(dateValue, 'yyyy-MM-dd');
+      const dateTimeStr = `${dateStr}T${meeting.meetingTime}`;
+      return new Date(dateTimeStr);
+    } catch (err) {
+      console.error('Error parsing meeting datetime:', err);
+      return null;
+    }
+  };
+
+  const isWithinSessionWindow = (meetingDateTime:any) => {
+    const now = new Date();
+    const sessionStart = subMinutes(meetingDateTime, 5);
+    const sessionEnd = addMinutes(meetingDateTime, 45);
+
+    return isWithinInterval(now, {
+      start: sessionStart,
+      end: sessionEnd
+    });
+  };
+
   useEffect(() => {
     let meetingEndedTimeout:any;
 
