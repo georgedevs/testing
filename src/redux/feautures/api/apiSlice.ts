@@ -15,9 +15,7 @@ const mutex = new Mutex();
 const baseQuery = fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_SERVER_URL,
     credentials: 'include',
-    prepareHeaders: (headers, { getState }) => {
-        // Add any custom headers if needed
-        headers.set('Accept', 'application/json');
+    prepareHeaders: (headers) => {
         return headers;
     },
 });
