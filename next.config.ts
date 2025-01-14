@@ -19,14 +19,6 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_SERVER_URL}/:path*`,  // Changed to backticks
-      },
-    ];
-  },
 };
 
 export default nextConfig;
