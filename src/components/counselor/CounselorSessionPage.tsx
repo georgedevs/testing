@@ -13,31 +13,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useGetCounselorActiveSessionQuery } from '@/redux/feautures/booking/bookingApi';
-import { useSocket } from '../SocketProvider';
 
 const CounselorSessionPage = () => {
-  const socket = useSocket();
   const router = useRouter();
-  const { data: activeSession, isLoading,refetch } = useGetCounselorActiveSessionQuery();
+  const { data: activeSession, isLoading } = useGetCounselorActiveSessionQuery();
   const [error, setError] = useState('');
   const [isJoining, setIsJoining] = useState(false);
   const [isDailyLoaded, setIsDailyLoaded] = useState(false);
   const [callFrame, setCallFrame] = useState(null);
-
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleBookingUpdate = () => {
-      refetch();
-    };
-
-    socket.on('booking_updated', handleBookingUpdate);
-
-    return () => {
-      socket.off('booking_updated', handleBookingUpdate);
-    };
-  }, [socket, refetch]);
-
 
   const handleDailyLoad = () => {
     setIsDailyLoaded(true);
