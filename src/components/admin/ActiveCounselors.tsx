@@ -238,7 +238,7 @@ const ActiveCounselors = () => {
                   <p className="text-sm text-gray-500">Rating</p>
                   <p className="font-medium flex items-center gap-1">
                     <Star className="w-4 h-4 text-yellow-500" />
-                    {selectedCounselor.rating.toFixed(1)}
+                    {selectedCounselor.rating}
                   </p>
                 </div>
                 <div className="space-y-2">
