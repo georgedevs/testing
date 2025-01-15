@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import Joyride, { STATUS, CallBackProps } from 'react-joyride';
+import dynamic from 'next/dynamic';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
+
+// Dynamically import Joyride with no SSR
+const Joyride = dynamic(
+  () => import('react-joyride').then((mod) => mod.default),
+  { ssr: false }
+);
 
 interface TourStep {
   target: string;
@@ -16,15 +22,22 @@ interface DashboardTourProps {
 
 const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOpen }) => {
   const [runTour, setRunTour] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const user = useSelector((state: RootState) => state.auth.user);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     // Check if this is user's first time and avatar modal is closed
-    const hasSeenTour = localStorage.getItem('hasSeenDashboardTour');
-    if (!hasSeenTour && !isAvatarModalOpen && user?.avatar) {
-      setRunTour(true);
+    if (mounted) {
+      const hasSeenTour = localStorage.getItem('hasSeenDashboardTour');
+      if (!hasSeenTour && !isAvatarModalOpen && user?.avatar) {
+        setRunTour(true);
+      }
     }
-  }, [isAvatarModalOpen, user]);
+  }, [isAvatarModalOpen, user, mounted]);
 
   const steps: TourStep[] = [
     {
@@ -58,9 +71,9 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOp
     }
   ];
 
-  const handleTourCallback = (data: CallBackProps) => {
+  const handleTourCallback = (data: any) => {
     const { status } = data;
-    const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
+    const finishedStatuses = ['FINISHED', 'SKIPPED'];
 
     if (finishedStatuses.includes(status)) {
       setRunTour(false);
@@ -68,31 +81,35 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOp
     }
   };
 
+  if (!mounted) return <>{children}</>;
+
   return (
     <>
-      <Joyride
-        steps={steps}
-        run={runTour}
-        continuous
-        showProgress
-        showSkipButton
-        callback={handleTourCallback}
-        styles={{
-          options: {
-            primaryColor: '#2563eb',
-            zIndex: 1000,
-          },
-          tooltipContainer: {
-            textAlign: 'left',
-          },
-          buttonNext: {
-            backgroundColor: '#2563eb',
-          },
-          buttonBack: {
-            marginRight: 10,
-          },
-        }}
-      />
+      {mounted && (
+        <Joyride
+          steps={steps}
+          run={runTour}
+          continuous
+          showProgress
+          showSkipButton
+          callback={handleTourCallback}
+          styles={{
+            options: {
+              primaryColor: '#2563eb',
+              zIndex: 1000,
+            },
+            tooltipContainer: {
+              textAlign: 'left',
+            },
+            buttonNext: {
+              backgroundColor: '#2563eb',
+            },
+            buttonBack: {
+              marginRight: 10,
+            },
+          }}
+        />
+      )}
       {children}
     </>
   );
