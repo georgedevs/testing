@@ -11,6 +11,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { useRouter } from 'next/navigation';
 import { 
   useGetCounselorSessionHistoryQuery, 
   useGetCounselorStatisticsQuery,
@@ -23,6 +25,7 @@ interface ExtendedCounselorStatistics extends CounselorStatistics {
 }
 
 const CounselorSessionHistory = () => {
+  const router = useRouter();
   const { data: historyData, isLoading: historyLoading } = useGetCounselorSessionHistoryQuery();
   const { data: statsData, isLoading: statsLoading } = useGetCounselorStatisticsQuery();
 
@@ -55,12 +58,31 @@ const CounselorSessionHistory = () => {
     );
   }
 
-  const completedSessions = historyData?.history.filter(session => session.status === 'completed').length || 0;
-  const totalSessions = historyData?.history.length || 0;
+  // If there's no history data or the history array is empty
+  if (!historyData?.history || historyData.history.length === 0) {
+    return (
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle>No Session History</CardTitle>
+          <CardDescription>
+            You haven't conducted any counseling sessions yet.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={() => router.push('/counselor/requests')}>
+            View Session Requests
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const completedSessions = historyData.history.filter(session => session.status === 'completed').length;
+  const totalSessions = historyData.history.length;
   const statistics = statsData?.statistics as ExtendedCounselorStatistics;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto space-y-6">
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
@@ -134,7 +156,7 @@ const CounselorSessionHistory = () => {
         <CardContent>
           <ScrollArea className="h-[600px] pr-4">
             <div className="space-y-4">
-              {historyData?.history.map((session) => (
+              {historyData.history.map((session) => (
                 <Card key={session.id} className="p-4 hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-4">
                     <Avatar className="w-12 h-12">
