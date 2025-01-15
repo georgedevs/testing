@@ -13,14 +13,31 @@ import {
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useGetCounselorActiveSessionQuery } from '@/redux/feautures/booking/bookingApi';
+import { useSocket } from '../SocketProvider';
 
 const CounselorSessionPage = () => {
+  const socket = useSocket();
   const router = useRouter();
-  const { data: activeSession, isLoading } = useGetCounselorActiveSessionQuery();
+  const { data: activeSession, isLoading,refetch } = useGetCounselorActiveSessionQuery();
   const [error, setError] = useState('');
   const [isJoining, setIsJoining] = useState(false);
   const [isDailyLoaded, setIsDailyLoaded] = useState(false);
   const [callFrame, setCallFrame] = useState(null);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleBookingUpdate = () => {
+      refetch();
+    };
+
+    socket.on('booking_updated', handleBookingUpdate);
+
+    return () => {
+      socket.off('booking_updated', handleBookingUpdate);
+    };
+  }, [socket, refetch]);
+
 
   const handleDailyLoad = () => {
     setIsDailyLoaded(true);
@@ -47,26 +64,17 @@ const CounselorSessionPage = () => {
     }
   };
 
-  const convertToUTC = (date: Date): Date => {
-    return new Date(Date.UTC(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes(),
-      date.getSeconds()
-    ));
-  };
-  
-
-  const isWithinSessionWindow = (meetingDateTime: Date) => {
+  const isWithinSessionWindow = (meetingDateTime:any) => {
     const now = new Date();
-    const utcNow = convertToUTC(now);
-    const utcSessionStart = subMinutes(convertToUTC(meetingDateTime), 5);
-    const utcSessionEnd = addMinutes(convertToUTC(meetingDateTime), 45);
-  
-    return utcNow >= utcSessionStart && utcNow <= utcSessionEnd;
+    const sessionStart = subMinutes(meetingDateTime, 5);
+    const sessionEnd = addMinutes(meetingDateTime, 45);
+
+    return isWithinInterval(now, {
+      start: sessionStart,
+      end: sessionEnd
+    });
   };
+
   useEffect(() => {
     let meetingEndedTimeout:any;
 
