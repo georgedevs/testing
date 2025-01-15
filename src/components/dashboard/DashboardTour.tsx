@@ -134,15 +134,17 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOp
   }, [isAvatarModalOpen, user, mounted]);
 
   // Handlers
-  const handleTourCallback = async (data: JoyrideCallbackData) => {
-    const { status } = data;
-    const finishedStatuses = ['FINISHED', 'SKIPPED'];
-
-    if (finishedStatuses.includes(status)) {
+  const handleTourCallback = async (data: any) => {
+    const { status, type } = data;
+  
+    // Check if tour is finished or skipped
+    if ((type === 'tour:end' && status === 'finished') || status === 'skipped') {
       setIsLoading(true);
       try {
-        await updateTourStatus().unwrap();
-        setRunTour(false);
+        const result = await updateTourStatus().unwrap();
+        if (result.success) {
+          setRunTour(false);
+        }
       } catch (error) {
         console.error('Failed to update tour status:', error);
       } finally {
