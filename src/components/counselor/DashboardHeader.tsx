@@ -49,7 +49,9 @@ export const DashboardHeader = () => {
         </div>
 
         <div className="flex items-center gap-2 lg:gap-4">
+        <div data-tutorial="counselor-notifications">
           <CounselorNotifications />
+          </div>
           
           <Button
             variant="ghost"
@@ -64,6 +66,7 @@ export const DashboardHeader = () => {
             )}
           </Button>
           
+          <div data-tutorial="counselor-profile">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="rounded-full h-10 w-10 p-0">
@@ -92,6 +95,7 @@ export const DashboardHeader = () => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+        </div>
         </div>
       </div>
     </header>
