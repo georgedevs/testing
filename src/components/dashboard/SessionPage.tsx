@@ -189,15 +189,25 @@ const SessionPage = () => {
     }
   };
 
+  const convertToUTC = (date: Date): Date => {
+    return new Date(Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      date.getHours(),
+      date.getMinutes(),
+      date.getSeconds()
+    ));
+  };
+  
+
   const isWithinSessionWindow = (meetingDateTime: Date) => {
     const now = new Date();
-    const sessionStart = subMinutes(meetingDateTime, 5);
-    const sessionEnd = addMinutes(meetingDateTime, 45);
-
-    return isWithinInterval(now, {
-      start: sessionStart,
-      end: sessionEnd
-    });
+    const utcNow = convertToUTC(now);
+    const utcSessionStart = subMinutes(convertToUTC(meetingDateTime), 5);
+    const utcSessionEnd = addMinutes(convertToUTC(meetingDateTime), 45);
+  
+    return utcNow >= utcSessionStart && utcNow <= utcSessionEnd;
   };
 
   const getSessionStatus = () => {
