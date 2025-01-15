@@ -40,8 +40,8 @@ export const DashboardHeader = () => {
       <div className="flex items-center justify-between h-full gap-2 lg:gap-4 max-w-screen-2xl mx-auto">
         <div className="flex items-center gap-4">
           <MobileNav />
-          <Link href="/admin" className="hidden lg:block">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent hover:opacity-80 transition-opacity duration-300">
+          <Link href="/admin" className="flex items-center lg:block">
+            <h1 className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent hover:opacity-80 transition-opacity duration-300">
               MiCounselor
             </h1>
           </Link>
