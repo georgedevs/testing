@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
-import { Loader, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useUpdateTourStatusMutation } from '@/redux/feautures/user/userApi';
+import { Styles } from 'react-joyride';
 
 // Dynamically import Joyride to avoid SSR issues
 const Joyride = dynamic(
@@ -20,42 +21,15 @@ interface TourStep {
   title?: string;
 }
 
-interface DashboardTourProps {
+interface CounselorDashboardTourProps {
   children: React.ReactNode;
   isAvatarModalOpen: boolean;
 }
 
-interface JoyrideStyles {
-  options: {
-    primaryColor: string;
-    zIndex: number;
-    arrowColor: string;
-    backgroundColor: string;
-    overlayColor: string;
-    textColor: string;
-  };
-  tooltipContainer: {
-    textAlign: 'left' | 'center' | 'right';
-  };
-  buttonNext: {
-    backgroundColor: string;
-  };
-  buttonBack: {
-    marginRight: number;
-  };
-  spotlight: {
-    backgroundColor: string;
-  };
-}
-
-interface JoyrideCallbackData {
-  action: string;
-  index: number;
-  type: string;
-  status: string;
-}
-
-const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOpen }) => {
+const CounselorDashboardTour: React.FC<CounselorDashboardTourProps> = ({ 
+  children, 
+  isAvatarModalOpen 
+}) => {
   // State management
   const [runTour, setRunTour] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -68,38 +42,38 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOp
   // Tour steps configuration
   const steps: TourStep[] = [
     {
-      target: '[data-tutorial="notifications"]',
-      content: 'Get notified about your upcoming sessions and important updates',
+      target: '[data-tutorial="counselor-notifications"]',
+      content: 'Get notified about new meeting requests and upcoming sessions',
       disableBeacon: true,
     },
     {
-      target: '[data-tutorial="profile-menu"]',
-      content: 'Access your profile settings and account options',
+      target: '[data-tutorial="counselor-profile"]',
+      content: 'Manage your counselor profile and settings',
     },
     {
-      target: '[data-tutorial="profile-completion"]',
-      content: 'Complete your profile to get the most out of our counseling services',
+      target: '[data-tutorial="upcoming-sessions"]',
+      content: 'View and manage your scheduled counseling sessions for the next 7 days',
     },
     {
-      target: '[data-tutorial="book-meeting"]',
-      content: 'Schedule your counseling sessions at your convenience',
+      target: '[data-tutorial="meeting-requests"]',
+      content: 'Review and respond to new client meeting requests',
     },
     {
-      target: '[data-tutorial="join-session"]',
-      content: 'Join your scheduled counseling sessions with just one click',
+      target: '[data-tutorial="session-history"]',
+      content: 'Access your past session records and client history',
     },
     {
-      target: '[data-tutorial="meeting-history"]',
-      content: 'View your past sessions and track your progress',
+      target: '[data-tutorial="client-feedback"]',
+      content: 'View feedback and ratings from your clients',
     },
     {
-      target: '[data-tutorial="feedback"]',
-      content: 'Share your feedback to help us improve our services',
+      target: '[data-tutorial="counselor-availability"]',
+      content: 'Set your working hours and manage your availability',
     }
   ];
 
   // Joyride styles
-  const tourStyles: JoyrideStyles = {
+  const tourStyles: Styles = {
     options: {
       primaryColor: '#2563eb',
       zIndex: 9999,
@@ -109,7 +83,7 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOp
       textColor: '#1f2937'
     },
     tooltipContainer: {
-      textAlign: 'left'
+      textAlign: 'left' as const, 
     },
     buttonNext: {
       backgroundColor: '#2563eb'
@@ -193,4 +167,4 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOp
   );
 };
 
-export default DashboardTour;
+export default CounselorDashboardTour;

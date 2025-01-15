@@ -17,7 +17,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ user }) => {
       icon: <Clock className="w-6 h-6 text-blue-500" />,
       href: "/counselor/upcoming",
       stats: "Next 7 days",
-      color: "from-blue-600 to-blue-400"
+      color: "from-blue-600 to-blue-400",
+      dataTutorial: "upcoming-sessions"
     },
     {
       title: "Meeting Requests",
@@ -25,7 +26,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ user }) => {
       icon: <Calendar className="w-6 h-6 text-purple-500" />,
       href: "/counselor/requests",
       stats: "Pending requests",
-      color: "from-purple-600 to-purple-400"
+      color: "from-purple-600 to-purple-400",
+      dataTutorial: "meeting-requests"
     },
     {
       title: "Session History",
@@ -33,7 +35,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ user }) => {
       icon: <History className="w-6 h-6 text-emerald-500" />,
       href: "/counselor/history",
       stats: "Past sessions",
-      color: "from-emerald-600 to-emerald-400"
+      color: "from-emerald-600 to-emerald-400",
+      dataTutorial: "session-history"
     },
     {
       title: "Client Feedback",
@@ -41,11 +44,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ user }) => {
       icon: <MessageSquare className="w-6 h-6 text-rose-500" />,
       href: "/counselor/feedback",
       stats: "Recent feedback",
-      color: "from-rose-600 to-rose-400"
+      color: "from-rose-600 to-rose-400",
+      dataTutorial: "client-feedback"
     }
   ];
 
-  // Calculate profile completion using the same logic as in CounselorProfileCompletionCard
   const calculateProfileCompletion = (user: any): number => {
     if (!user) return 0;
     
@@ -121,28 +124,32 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ user }) => {
       )}
       
       <div className="grid md:grid-cols-2 gap-6">
-        {quickActions.map((action) => (
-          <Link href={action.href} key={action.title}>
-            <Card className="h-full transition-all duration-200 hover:shadow-lg hover:border-blue-500/50 group">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-lg font-semibold">
-                  {action.icon}
-                </CardTitle>
-                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
-              </CardHeader>
-              <CardContent>
-                <h3 className={`text-xl font-bold bg-gradient-to-r ${action.color} bg-clip-text text-transparent`}>
-                  {action.title}
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                  {action.description}
-                </p>
-                <div className="mt-4 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                  <span className="font-medium">{action.stats}</span>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+      {quickActions.map((action) => (
+  <Link 
+    href={action.href} 
+    key={action.title}
+    data-tutorial={action.dataTutorial}
+  >
+    <Card className="h-full transition-all duration-200 hover:shadow-lg hover:border-blue-500/50 group">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-lg font-semibold">
+          {action.icon}
+        </CardTitle>
+        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
+      </CardHeader>
+      <CardContent>
+        <h3 className={`text-xl font-bold bg-gradient-to-r ${action.color} bg-clip-text text-transparent`}>
+          {action.title}
+        </h3>
+        <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+          {action.description}
+        </p>
+        <div className="mt-4 flex items-center text-sm text-gray-500 dark:text-gray-400">
+          <span className="font-medium">{action.stats}</span>
+        </div>
+      </CardContent>
+    </Card>
+  </Link>
         ))}
       </div>
 
