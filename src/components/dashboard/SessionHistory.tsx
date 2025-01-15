@@ -10,11 +10,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useGetClientSessionHistoryQuery } from '@/redux/feautures/booking/bookingApi';
 
 const SessionHistory = () => {
+  const router = useRouter();
   const { data: historyData, isLoading } = useGetClientSessionHistoryQuery();
 
   const getStatusColor = (status:any) => {
@@ -46,6 +48,24 @@ const SessionHistory = () => {
     );
   }
 
+  if (!historyData?.history?.length) {
+    return (
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle>No Sessions Yet</CardTitle>
+          <CardDescription>
+            You haven't had any counseling sessions yet. Book your first session to get started.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={() => router.push('/dashboard/book')}>
+            Book Your First Session
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -57,7 +77,7 @@ const SessionHistory = () => {
       <CardContent>
         <ScrollArea className="h-[600px] pr-4">
           <div className="space-y-4">
-            {historyData?.history.map((session) => (
+            {historyData.history.map((session) => (
               <Card key={session.id} className="p-4 hover:shadow-md transition-shadow">
                 <div className="flex items-start gap-4">
                   <Avatar className="w-12 h-12">

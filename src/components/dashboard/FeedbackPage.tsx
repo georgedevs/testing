@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useGetClientSessionHistoryQuery, useRateSessionMutation, useGetSessionRatingStatusQuery } from '@/redux/feautures/booking/bookingApi';
 import { Loader2, Star, Calendar, Clock, Video, MapPin } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -16,6 +17,7 @@ import {
 import { toast } from 'sonner';
 
 const FeedbackPage = () => {
+  const router = useRouter();
   const [selectedSession, setSelectedSession] = useState(null);
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState('');
@@ -28,7 +30,6 @@ const FeedbackPage = () => {
     skip: !selectedSession,
   });
 
-  // Update local rated sessions state when rating status changes
   useEffect(() => {
     if (ratingStatus?.data?.isRated && selectedSession) {
       setRatedSessions(prev => ({
@@ -56,14 +57,10 @@ const FeedbackPage = () => {
       }).unwrap();
 
       toast.success(response.message || 'Feedback submitted successfully');
-      
-      // Update local state to mark this session as rated
       setRatedSessions(prev => ({
         ...prev,
         [selectedSession]: true
       }));
-
-      // Reset form and close dialog
       setSelectedSession(null);
       setRating(0);
       setFeedback('');
@@ -105,9 +102,30 @@ const FeedbackPage = () => {
     );
   }
 
-  const unratedSessions = historyData?.history.filter(
+  const unratedSessions = historyData?.history?.filter(
     (session) => session.status === 'completed'
   );
+
+  if (!unratedSessions?.length) {
+    return (
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle>No Sessions to Rate</CardTitle>
+          <CardDescription>
+            You don't have any completed sessions to provide feedback for at the moment.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Once you complete a counseling session, you'll be able to rate your experience and provide valuable feedback.
+          </p>
+          <Button onClick={() => router.push('/dashboard/book')}>
+            Book a Session
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full">
@@ -120,20 +138,20 @@ const FeedbackPage = () => {
       <CardContent>
         <ScrollArea className="h-[600px] pr-4">
           <div className="space-y-4">
-            {unratedSessions?.map((session) => {
+            {unratedSessions.map((session) => {
               const isRated = ratedSessions[session.id];
               
               return (
                 <Card key={session.id} className="p-4 hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-4">
                     <Avatar className="w-12 h-12">
-                      <AvatarImage src={session.counselorAvatar} alt={"Anonymous Counselor"} />
+                      <AvatarImage src={session.counselorAvatar} alt="Anonymous Counselor" />
                       <AvatarFallback>{session.counselorName[0]}</AvatarFallback>
                     </Avatar>
                     
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-lg">{"Anonymous Counselor"}</h3>
+                        <h3 className="font-semibold text-lg">Anonymous Counselor</h3>
                         <Button 
                           variant={isRated ? "secondary" : "outline"}
                           onClick={() => !isRated && setSelectedSession(session.id)}
@@ -143,7 +161,7 @@ const FeedbackPage = () => {
                         </Button>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 dark:text-gray-300">
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4" />
                           <span>{session.date}</span>
