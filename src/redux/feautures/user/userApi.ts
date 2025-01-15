@@ -62,7 +62,18 @@ export const userApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
+    updateTourStatus: builder.mutation<
+    { success: boolean; message: string },
+    void
+>({
+    query: () => ({
+        url: "update-tour-status",
+        method: "PUT",
+        credentials: "include" as const,
+    }),
+    invalidatesTags: ["User"],
+}),
   }),
 });
 
-export const { useUpdateClientProfileMutation, useUpdateCounselorProfileMutation } = userApi;
+export const { useUpdateClientProfileMutation, useUpdateCounselorProfileMutation,useUpdateTourStatusMutation } = userApi;

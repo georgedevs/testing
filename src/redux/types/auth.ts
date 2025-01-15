@@ -17,6 +17,7 @@ export interface IUser {
   marriageYears?: number;
   age?: number;
   currentCounselor?: ICounselor;
+  tourViewed?:boolean;
 }
 
 export interface ICounselorProfile {
