@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGetClientSessionHistoryQuery, useRateSessionMutation, useGetSessionRatingStatusQuery } from '@/redux/feautures/booking/bookingApi';
 import { Loader2, Star, Calendar, Clock, Video, MapPin } from 'lucide-react';
@@ -22,22 +22,66 @@ const FeedbackPage = () => {
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [ratedSessions, setRatedSessions] = useState({});
   
   const { data: historyData, isLoading } = useGetClientSessionHistoryQuery();
   const [rateSession] = useRateSessionMutation();
-  const { data: ratingStatus } = useGetSessionRatingStatusQuery(selectedSession ?? '', {
-    skip: !selectedSession,
-  });
 
-  useEffect(() => {
-    if (ratingStatus?.data?.isRated && selectedSession) {
-      setRatedSessions(prev => ({
-        ...prev,
-        [selectedSession]: true
-      }));
-    }
-  }, [ratingStatus, selectedSession]);
+  // Create a SessionCard component to handle individual session ratings
+  const SessionCard = ({ session }) => {
+    // Query rating status for each session individually
+    const { data: ratingStatus, isLoading: statusLoading } = useGetSessionRatingStatusQuery(session.id);
+    const isRated = ratingStatus?.data?.isRated;
+
+    return (
+      <Card className="p-4 hover:shadow-md transition-shadow">
+        <div className="flex items-start gap-4">
+          <Avatar className="w-12 h-12">
+            <AvatarImage src={session.counselorAvatar} alt="Anonymous Counselor" />
+            <AvatarFallback>{session.counselorName[0]}</AvatarFallback>
+          </Avatar>
+          
+          <div className="flex-1 space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-lg">Anonymous Counselor</h3>
+              <Button 
+                variant={isRated ? "secondary" : "outline"}
+                onClick={() => !isRated && setSelectedSession(session.id)}
+                disabled={isRated || statusLoading}
+              >
+                {statusLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : isRated ? (
+                  'Session Rated'
+                ) : (
+                  'Rate Session'
+                )}
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 dark:text-gray-300">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                <span>{session.date}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                <span>{session.time}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-sm">
+              {session.type === 'virtual' ? (
+                <Video className="w-4 h-4" />
+              ) : (
+                <MapPin className="w-4 h-4" />
+              )}
+              <span className="capitalize">{session.type} Session</span>
+            </div>
+          </div>
+        </div>
+      </Card>
+    );
+  };
 
   const handleRatingSubmit = async () => {
     if (isSubmitting) return;
@@ -57,10 +101,6 @@ const FeedbackPage = () => {
       }).unwrap();
 
       toast.success(response.message || 'Feedback submitted successfully');
-      setRatedSessions(prev => ({
-        ...prev,
-        [selectedSession]: true
-      }));
       setSelectedSession(null);
       setRating(0);
       setFeedback('');
@@ -102,11 +142,11 @@ const FeedbackPage = () => {
     );
   }
 
-  const unratedSessions = historyData?.history?.filter(
+  const completedSessions = historyData?.history?.filter(
     (session) => session.status === 'completed'
   );
 
-  if (!unratedSessions?.length) {
+  if (!completedSessions?.length) {
     return (
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
@@ -138,53 +178,9 @@ const FeedbackPage = () => {
       <CardContent>
         <ScrollArea className="h-[600px] pr-4">
           <div className="space-y-4">
-            {unratedSessions.map((session) => {
-              const isRated = ratedSessions[session.id];
-              
-              return (
-                <Card key={session.id} className="p-4 hover:shadow-md transition-shadow">
-                  <div className="flex items-start gap-4">
-                    <Avatar className="w-12 h-12">
-                      <AvatarImage src={session.counselorAvatar} alt="Anonymous Counselor" />
-                      <AvatarFallback>{session.counselorName[0]}</AvatarFallback>
-                    </Avatar>
-                    
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-lg">Anonymous Counselor</h3>
-                        <Button 
-                          variant={isRated ? "secondary" : "outline"}
-                          onClick={() => !isRated && setSelectedSession(session.id)}
-                          disabled={isRated}
-                        >
-                          {isRated ? 'Session Rated' : 'Rate Session'}
-                        </Button>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 dark:text-gray-300">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4" />
-                          <span>{session.date}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4" />
-                          <span>{session.time}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-sm">
-                        {session.type === 'virtual' ? (
-                          <Video className="w-4 h-4" />
-                        ) : (
-                          <MapPin className="w-4 h-4" />
-                        )}
-                        <span className="capitalize">{session.type} Session</span>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              );
-            })}
+            {completedSessions.map((session) => (
+              <SessionCard key={session.id} session={session} />
+            ))}
           </div>
         </ScrollArea>
 
