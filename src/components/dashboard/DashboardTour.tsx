@@ -20,24 +20,26 @@ interface DashboardTourProps {
   isAvatarModalOpen: boolean;
 }
 
+const TOUR_STATE_KEY = 'dashboard_tour_completed';
+
 const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOpen }) => {
   const [runTour, setRunTour] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [hasCompletedTour, setHasCompletedTour] = useState(true); // Default to true to prevent flash
   const user = useSelector((state: RootState) => state.auth.user);
 
   useEffect(() => {
     setMounted(true);
+    // Check localStorage for tour completion status
+    const tourCompleted = localStorage.getItem(TOUR_STATE_KEY);
+    setHasCompletedTour(!!tourCompleted);
   }, []);
 
   useEffect(() => {
-    // Check if this is user's first time and avatar modal is closed
-    if (mounted) {
-      const hasSeenTour = localStorage.getItem('hasSeenDashboardTour');
-      if (!hasSeenTour && !isAvatarModalOpen && user?.avatar) {
-        setRunTour(true);
-      }
+    if (mounted && !hasCompletedTour && !isAvatarModalOpen && user?.avatar) {
+      setRunTour(true);
     }
-  }, [isAvatarModalOpen, user, mounted]);
+  }, [isAvatarModalOpen, user, mounted, hasCompletedTour]);
 
   const steps: TourStep[] = [
     {
@@ -77,7 +79,8 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOp
 
     if (finishedStatuses.includes(status)) {
       setRunTour(false);
-      localStorage.setItem('hasSeenDashboardTour', 'true');
+      setHasCompletedTour(true);
+      localStorage.setItem(TOUR_STATE_KEY, 'true');
     }
   };
 
@@ -85,18 +88,25 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOp
 
   return (
     <>
-      {mounted && (
+      {mounted && !hasCompletedTour && (
         <Joyride
           steps={steps}
           run={runTour}
           continuous
           showProgress
           showSkipButton
+          spotlightClicks={false}
+          disableOverlayClose
+          hideCloseButton
           callback={handleTourCallback}
           styles={{
             options: {
               primaryColor: '#2563eb',
               zIndex: 1000,
+              arrowColor: '#fff',
+              backgroundColor: '#fff',
+              overlayColor: 'rgba(0, 0, 0, 0.5)',
+              textColor: '#333',
             },
             tooltipContainer: {
               textAlign: 'left',
@@ -107,6 +117,12 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOp
             buttonBack: {
               marginRight: 10,
             },
+            spotlight: {
+              backgroundColor: 'transparent',
+            },
+          }}
+          floaterProps={{
+            disableAnimation: true,
           }}
         />
       )}
