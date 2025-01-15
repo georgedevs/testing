@@ -66,70 +66,38 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOp
   const [updateTourStatus] = useUpdateTourStatusMutation();
 
   // Tour steps configuration
+
   const steps: TourStep[] = [
     {
-      target: '[data-tutorial="welcome"]',
-      content: 'Welcome to MiCounselor! Lets take a quick tour to help you get started.',
-      title: 'Welcome! 👋',
-      placement: 'center',
-      disableBeacon: true
-    },
-    {
       target: '[data-tutorial="notifications"]',
-      content: 'Stay updated with notifications about your upcoming sessions, messages from counselors, and important updates.',
-      title: 'Notifications 🔔',
-      placement: 'bottom'
+      content: 'Get notified about your upcoming sessions and important updates',
+      disableBeacon: true,
     },
     {
       target: '[data-tutorial="profile-menu"]',
-      content: 'Access your profile settings, manage your account, and customize your preferences here.',
-      title: 'Profile Settings ⚙️',
-      placement: 'bottom'
+      content: 'Access your profile settings and account options',
     },
     {
       target: '[data-tutorial="profile-completion"]',
-      content: 'Complete your profile to help us match you with the right counselor and provide better support.',
-      title: 'Profile Completion 📝',
-      placement: 'right'
-    },
-    {
-      target: '[data-tutorial="counselor-search"]',
-      content: 'Find and connect with counselors that match your preferences and needs.',
-      title: 'Find Your Counselor 🔍',
-      placement: 'bottom'
+      content: 'Complete your profile to get the most out of our counseling services',
     },
     {
       target: '[data-tutorial="book-meeting"]',
-      content: 'Schedule counseling sessions at times that work best for you.',
-      title: 'Book Sessions 📅',
-      placement: 'right'
+      content: 'Schedule your counseling sessions at your convenience',
     },
     {
       target: '[data-tutorial="join-session"]',
-      content: 'Join your scheduled counseling sessions with a single click when its time.',
-      title: 'Join Sessions 🎥',
-      placement: 'left'
+      content: 'Join your scheduled counseling sessions with just one click',
     },
     {
       target: '[data-tutorial="meeting-history"]',
-      content: 'Review your past sessions, track your progress, and manage upcoming appointments.',
-      title: 'Session History 📊',
-      placement: 'right'
-    },
-    {
-      target: '[data-tutorial="chat"]',
-      content: 'Communicate securely with your counselor between sessions.',
-      title: 'Secure Chat 💬',
-      placement: 'left'
+      content: 'View your past sessions and track your progress',
     },
     {
       target: '[data-tutorial="feedback"]',
-      content: 'Share your feedback to help us improve and provide better support for your journey.',
-      title: 'Feedback 💭',
-      placement: 'left'
+      content: 'Share your feedback to help us improve our services',
     }
   ];
-
   // Joyride styles
   const tourStyles: JoyrideStyles = {
     options: {
@@ -165,6 +133,8 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOp
     }
   }, [isAvatarModalOpen, user, mounted]);
 
+  console.log(user?.tourViewed);
+  
   // Handlers
   const handleTourCallback = async (data: JoyrideCallbackData) => {
     const { status } = data;
