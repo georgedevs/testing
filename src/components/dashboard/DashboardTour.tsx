@@ -66,7 +66,6 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOp
   const [updateTourStatus] = useUpdateTourStatusMutation();
 
   // Tour steps configuration
-
   const steps: TourStep[] = [
     {
       target: '[data-tutorial="notifications"]',
@@ -98,6 +97,7 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOp
       content: 'Share your feedback to help us improve our services',
     }
   ];
+
   // Joyride styles
   const tourStyles: JoyrideStyles = {
     options: {
@@ -133,8 +133,6 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOp
     }
   }, [isAvatarModalOpen, user, mounted]);
 
-  console.log(user?.tourViewed);
-  
   // Handlers
   const handleTourCallback = async (data: JoyrideCallbackData) => {
     const { status } = data;
