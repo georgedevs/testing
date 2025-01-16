@@ -4,13 +4,6 @@ import type { NextRequest } from 'next/server';
 const publicRoutes = ['/', '/signin', '/signup', '/forgot-password', '/reset-password', '/about', '/resources', '/stories'];
 
 export async function middleware(request: NextRequest) {
-
-  const headers = new Headers(request.headers);
-  headers.set('X-Frame-Options', 'DENY');
-  headers.set('X-Content-Type-Options', 'nosniff');
-  headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  headers.set('Permissions-Policy', 'interest-cohort=()');
-
   const path = request.nextUrl.pathname;
   const isPublicPath = publicRoutes.includes(path);
   const token = request.cookies.get('access_token')?.value || '';
