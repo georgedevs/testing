@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -18,35 +18,66 @@ interface AdminVerificationModalProps {
 const AdminVerificationModal: React.FC<AdminVerificationModalProps> = ({ isOpen, onVerify }) => {
   const [verificationCode, setVerificationCode] = useState('');
   const [error, setError] = useState('');
+  const [attempts, setAttempts] = useState(0);
   const router = useRouter();
+  const MAX_ATTEMPTS = 5;
 
-  // This is a simple hash of 'password1234' - you can replace this with your preferred password's hash
-  const ADMIN_VERIFICATION_HASH = '4ea938c1267e5b091555b672d0468868';
+  // Using a simple string comparison for reliability
+  const ADMIN_PASSWORD = 'password1234';
 
-  const hashString = (str: string) => {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
+  useEffect(() => {
+    // Reset attempts when modal opens
+    const storedAttempts = sessionStorage.getItem('adminAttempts');
+    if (storedAttempts) {
+      setAttempts(parseInt(storedAttempts));
     }
-    return Math.abs(hash).toString(16);
-  };
+  }, []);
 
   const handleVerify = () => {
-    const hashedInput = hashString(verificationCode);
-    if (hashedInput === ADMIN_VERIFICATION_HASH) {
+    const newAttempts = attempts + 1;
+    setAttempts(newAttempts);
+    sessionStorage.setItem('adminAttempts', newAttempts.toString());
+
+    if (newAttempts >= MAX_ATTEMPTS) {
+      sessionStorage.removeItem('adminAttempts');
+      router.push('/signin');
+      return;
+    }
+
+    if (verificationCode === ADMIN_PASSWORD) {
       sessionStorage.setItem('adminVerified', 'true');
+      sessionStorage.removeItem('adminAttempts');
       onVerify();
       setError('');
     } else {
-      setError('Invalid verification code');
+      setError(`Invalid verification code. ${MAX_ATTEMPTS - newAttempts} attempts remaining.`);
     }
   };
 
   const handleCancel = () => {
-    router.push('/dashboard');
+    sessionStorage.removeItem('adminAttempts');
+    router.push('/signin');
   };
+
+  if (attempts >= MAX_ATTEMPTS) {
+    return (
+      <Dialog open={true} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-500">Maximum Attempts Exceeded</DialogTitle>
+            <DialogDescription>
+              You have exceeded the maximum number of attempts. Please try signing in again.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end">
+            <Button onClick={() => router.push('/signin')}>
+              Return to Sign In
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
@@ -55,6 +86,7 @@ const AdminVerificationModal: React.FC<AdminVerificationModalProps> = ({ isOpen,
           <DialogTitle>Admin Verification Required</DialogTitle>
           <DialogDescription>
             Please enter the admin verification code to continue.
+            {attempts > 0 && ` (${MAX_ATTEMPTS - attempts} attempts remaining)`}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
