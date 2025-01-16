@@ -9,6 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
+import { useLogoutMutation } from '@/redux/feautures/auth/authApi';
 
 interface AdminVerificationModalProps {
   isOpen: boolean;
@@ -20,18 +21,30 @@ const AdminVerificationModal: React.FC<AdminVerificationModalProps> = ({ isOpen,
   const [error, setError] = useState('');
   const [attempts, setAttempts] = useState(0);
   const router = useRouter();
+  const [logout] = useLogoutMutation();
   const MAX_ATTEMPTS = 5;
 
-  // Using a simple string comparison for reliability
   const ADMIN_PASSWORD = 'password1234';
 
   useEffect(() => {
-    // Reset attempts when modal opens
     const storedAttempts = sessionStorage.getItem('adminAttempts');
     if (storedAttempts) {
       setAttempts(parseInt(storedAttempts));
     }
   }, []);
+
+  const handleLogoutAndRedirect = async () => {
+    try {
+      await logout().unwrap();
+      sessionStorage.removeItem('adminAttempts');
+      sessionStorage.removeItem('adminVerified');
+      router.push('/signin');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still redirect even if logout fails
+      router.push('/signin');
+    }
+  };
 
   const handleVerify = () => {
     const newAttempts = attempts + 1;
@@ -39,8 +52,7 @@ const AdminVerificationModal: React.FC<AdminVerificationModalProps> = ({ isOpen,
     sessionStorage.setItem('adminAttempts', newAttempts.toString());
 
     if (newAttempts >= MAX_ATTEMPTS) {
-      sessionStorage.removeItem('adminAttempts');
-      router.push('/signin');
+      handleLogoutAndRedirect();
       return;
     }
 
@@ -55,8 +67,7 @@ const AdminVerificationModal: React.FC<AdminVerificationModalProps> = ({ isOpen,
   };
 
   const handleCancel = () => {
-    sessionStorage.removeItem('adminAttempts');
-    router.push('/signin');
+    handleLogoutAndRedirect();
   };
 
   if (attempts >= MAX_ATTEMPTS) {
@@ -70,7 +81,7 @@ const AdminVerificationModal: React.FC<AdminVerificationModalProps> = ({ isOpen,
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end">
-            <Button onClick={() => router.push('/signin')}>
+            <Button onClick={handleLogoutAndRedirect}>
               Return to Sign In
             </Button>
           </div>
