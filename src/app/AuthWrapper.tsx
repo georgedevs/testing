@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Loader from '@/components/Loader';
 import { useLoadUserQuery } from '@/redux/feautures/api/apiSlice';
 import { useSelector } from 'react-redux';
+import OfflineStatusHandler from '@/components/OfflineStatusHandler';
 
 const publicRoutes = [
     '/',
@@ -24,9 +25,9 @@ export default function AuthWrapper({
 }: {
     children: React.ReactNode;
 }) {
-    const { isLoading } = useLoadUserQuery(undefined, {
-        refetchOnMountOrArgChange: true, // Refetch on component mount
-        refetchOnFocus: true, // Refetch when window regains focus
+    const { isLoading, isError } = useLoadUserQuery(undefined, {
+        refetchOnMountOrArgChange: true,
+        refetchOnFocus: true,
     });
     
     const { user, isAuthenticated } = useSelector((state: any) => state.auth);
@@ -44,10 +45,15 @@ export default function AuthWrapper({
         }
     }, [pathname, isLoading, isAuthenticated, user, router]);
 
-    if (isLoading && !publicRoutes.includes(pathname) && 
-        !pathname.startsWith('/resources/')) {
-        return <Loader />;
-    }
-
-    return <>{children}</>;
+    // Wrap everything in the OfflineStatusHandler
+    return (
+        <OfflineStatusHandler>
+            {isLoading && !publicRoutes.includes(pathname) && 
+             !pathname.startsWith('/resources/') ? (
+                <Loader />
+            ) : (
+                children
+            )}
+        </OfflineStatusHandler>
+    );
 }
