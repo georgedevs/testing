@@ -10,6 +10,7 @@ import Header from '@/components/Header';
 import { useRegisterMutation } from '@/redux/feautures/auth/authApi';
 import VerificationModal from '@/components/VerificationModal';
 import PasswordValidator from '@/components/PasswordValidator';
+import PDFGuideSection from '@/components/PDFGuideSection';
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -215,6 +216,11 @@ const SignupPage = () => {
               We prioritize your privacy. Create an account to begin your anonymous counseling journey.
             </p>
           </motion.div>
+
+          <div className="lg:hidden mb-8">
+            <PDFGuideSection />
+          </div>
+
 
           <div className="grid lg:grid-cols-2 gap-8 items-start">
             {/* Sign Up Form */}
@@ -449,6 +455,9 @@ const SignupPage = () => {
                   </div>
                 </motion.div>
               </Card>
+              <div className="hidden lg:block mt-8">
+                <PDFGuideSection />
+              </div>
               </motion.div>
 
             {/* Privacy Features */}

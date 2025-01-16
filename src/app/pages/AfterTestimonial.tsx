@@ -80,7 +80,7 @@ const AfterTestimonial = () => {
                 transition={{ duration: 0.6, delay: 1 }}
                 className="text-sm text-gray-600 dark:text-gray-400"
               >
-                Book online in less than 60 Seconds! Need help?
+                Book online in less than no time! Need help?
               </motion.p>
               
               <motion.button
