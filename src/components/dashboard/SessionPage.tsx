@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useGetActiveBookingQuery } from '@/redux/feautures/booking/bookingApi';
 import { useSocket } from '@/components/SocketProvider';
+import { useAutoAbandon } from '../useAutoAbandon';
 
 interface DailyCallFrame {
   join: (options: { url: string; token: string }) => Promise<void>;
@@ -31,6 +32,8 @@ const SessionPage = () => {
   const [isJoining, setIsJoining] = useState(false);
   const [isDailyLoaded, setIsDailyLoaded] = useState(false);
   const [callFrame, setCallFrame] = useState<DailyCallFrame | null>(null);
+
+  useAutoAbandon(activeBooking?.booking);
 
   // Socket event handling for real-time updates
   useEffect(() => {
@@ -205,6 +208,10 @@ const SessionPage = () => {
       return 'Error loading session time';
     }
     
+    if (activeBooking?.booking?.status === 'abandoned') {
+      return 'Session was abandoned due to no attendance';
+    }
+    
     const now = new Date();
     const sessionStart = subMinutes(meetingDateTime, 5);
     
@@ -218,6 +225,7 @@ const SessionPage = () => {
     
     return 'Session is active';
   };
+  
 
   const handleEndCall = async () => {
     try {
@@ -252,13 +260,15 @@ const SessionPage = () => {
     );
   }
 
-  if (!activeBooking?.booking || activeBooking.booking.status !== 'confirmed') {
+  if (!activeBooking?.booking || !['confirmed', 'time_selected'].includes(activeBooking.booking.status)) {
     return (
       <Card className="max-w-2xl mx-auto mt-8">
         <CardHeader>
           <CardTitle>No Active Session</CardTitle>
           <CardDescription>
-            You don't have any confirmed sessions at the moment.
+            {activeBooking?.booking?.status === 'abandoned' 
+              ? 'This session was marked as abandoned because neither party joined within 15 minutes of the start time.'
+              : "You don't have any confirmed sessions at the moment."}
           </CardDescription>
         </CardHeader>
         <CardContent>

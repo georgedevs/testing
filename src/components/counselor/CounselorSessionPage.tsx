@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useGetCounselorActiveSessionQuery } from '@/redux/feautures/booking/bookingApi';
 import { useSocket } from '../SocketProvider';
+import { useAutoAbandon } from '../useAutoAbandon';
 
 const CounselorSessionPage = () => {
   const socket = useSocket();
@@ -23,6 +24,8 @@ const CounselorSessionPage = () => {
   const [isJoining, setIsJoining] = useState(false);
   const [isDailyLoaded, setIsDailyLoaded] = useState(false);
   const [callFrame, setCallFrame] = useState(null);
+
+  useAutoAbandon(activeSession?.booking);
 
   useEffect(() => {
     if (!socket) return;
@@ -195,13 +198,15 @@ const CounselorSessionPage = () => {
     );
   }
 
-  if (!activeSession?.booking || activeSession.booking.status !== 'confirmed') {
+  if (!activeSession?.booking || !['confirmed', 'time_selected'].includes(activeSession.booking.status)) {
     return (
       <Card className="max-w-2xl mx-auto mt-8">
         <CardHeader>
           <CardTitle>No Active Session</CardTitle>
           <CardDescription>
-            You don't have any confirmed sessions at the moment.
+            {activeSession?.booking?.status === 'abandoned' 
+              ? 'This session was marked as abandoned because neither party joined within 15 minutes of the start time.'
+              : "You don't have any confirmed sessions at the moment."}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -220,6 +225,10 @@ const CounselorSessionPage = () => {
   const getSessionStatus = () => {
     if (!meetingDateTime) {
       return 'Error loading session time';
+    }
+    
+    if (activeSession?.booking?.status === 'abandoned') {
+      return 'Session was abandoned due to no attendance';
     }
     
     const now = new Date();
