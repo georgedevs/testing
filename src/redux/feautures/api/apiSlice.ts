@@ -15,7 +15,12 @@ const mutex = new Mutex();
 const baseQuery = fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_SERVER_URL,
     credentials: 'include',
-});
+    prepareHeaders: (headers) => {
+      headers.set('Accept', 'application/json');
+      headers.set('Cache-Control', 'no-cache');
+      return headers;
+    },
+  });
 
 const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (args, api, extraOptions) => {
     // Wait until the mutex is available without locking it
