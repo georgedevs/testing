@@ -7,8 +7,8 @@ import { tokenService } from "@/utils/tokenService";
 interface RefreshResponse {
     success: boolean;
     accessToken: string;
+    refreshToken: string;
     user: IUser;
-    refreshToken:string;
 }
 
 const mutex = new Mutex();
@@ -40,6 +40,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
                     return result;
                 }
 
+                // Send refresh token in the request body
                 const refreshResult = await baseQuery(
                     {
                         url: 'refresh',
@@ -50,15 +51,31 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
                     extraOptions
                 );
 
-                if (refreshResult.data) {
-                    const { accessToken, refreshToken } = refreshResult.data as any;
-                    tokenService.setTokens(accessToken, refreshToken);
+                const data = refreshResult.data as RefreshResponse;
+                
+                if (data?.success) {
+                    // Store both new tokens
+                    tokenService.setTokens(data.accessToken, data.refreshToken);
+                    
+                    // Update auth state
+                    api.dispatch(
+                        userLoggedIn({
+                            accessToken: data.accessToken,
+                            refreshToken: data.refreshToken,
+                            user: data.user,
+                        })
+                    );
+
                     // Retry the original query with new access token
                     result = await baseQuery(args, api, extraOptions);
                 } else {
                     tokenService.clearTokens();
                     api.dispatch(userLoggedOut());
                 }
+            } catch (error) {
+                console.error('Token refresh failed:', error);
+                tokenService.clearTokens();
+                api.dispatch(userLoggedOut());
             } finally {
                 release();
             }
