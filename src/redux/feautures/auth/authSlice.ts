@@ -11,24 +11,25 @@ const initialState: AuthState = {
 };
 
 const authSlice = createSlice({
-    name: "auth",
-    initialState,
-    reducers: {
-        userRegistration: (state, action: PayloadAction<{ token: string }>) => {
-            state.activationToken = action.payload.token;
-        },
-        userLoggedIn: (state, action: PayloadAction<{ accessToken: string; user: IUser }>) => {
-            state.token = action.payload.accessToken;
-            state.user = action.payload.user;
-            state.isAuthenticated = true;
-            tokenService.setToken(action.payload.accessToken);
-        },
-        userLoggedOut: (state) => {
-            state.token = "";
-            state.user = null;
-            state.isAuthenticated = false;
-            tokenService.clearTokens();
-        },
+  name: "auth",
+  initialState,
+  reducers: {
+      userRegistration: (state, action: PayloadAction<{ token: string }>) => {
+          state.activationToken = action.payload.token;
+      },
+      userLoggedIn: (state, action: PayloadAction<{ accessToken: string; refreshToken: string; user: IUser }>) => {
+          state.token = action.payload.accessToken;
+          state.user = action.payload.user;
+          state.isAuthenticated = true;
+          // Store both tokens
+          tokenService.setTokens(action.payload.accessToken, action.payload.refreshToken);
+      },
+      userLoggedOut: (state) => {
+          state.token = "";
+          state.user = null;
+          state.isAuthenticated = false;
+          tokenService.clearTokens();
+      },
         updateUserAvatar: (state, action: PayloadAction<{ avatarId: string; imageUrl: string }>) => {
             if (state.user) {
                 state.user.avatar = {

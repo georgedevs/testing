@@ -66,15 +66,14 @@ export const authApi = apiSlice.injectEndpoints({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
           try {
               const result = await queryFulfilled;
-              // Store both tokens in localStorage
-              tokenService.setTokens(
-                  result.data.accessToken,
-                  result.data.refreshToken
-              );
+              const { accessToken, refreshToken, user } = result.data;
+              
+              // Dispatch with both tokens
               dispatch(
                   userLoggedIn({
-                      accessToken: result.data.accessToken,
-                      user: result.data.user,
+                      accessToken,
+                      refreshToken,
+                      user
                   })
               );
           } catch (error: any) {

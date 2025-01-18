@@ -8,6 +8,7 @@ interface RefreshResponse {
     success: boolean;
     accessToken: string;
     user: IUser;
+    refreshToken:string;
 }
 
 const mutex = new Mutex();
@@ -96,11 +97,27 @@ export const apiSlice = createApi({
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data } = await queryFulfilled;
-                    tokenService.setToken(data.accessToken);
-                    dispatch(userLoggedIn({ 
-                        accessToken: data.accessToken,
-                        user: data.user,
-                    }));
+                    
+                    // If the backend sends both tokens in the /me response
+                    if (data.accessToken && data.refreshToken) {
+                        dispatch(userLoggedIn({ 
+                            accessToken: data.accessToken,
+                            refreshToken: data.refreshToken,
+                            user: data.user,
+                        }));
+                    } else {
+                        // If you only get user data without tokens
+                        const currentAccessToken = tokenService.getAccessToken();
+                        const currentRefreshToken = tokenService.getRefreshToken();
+                        
+                        if (currentAccessToken && currentRefreshToken) {
+                            dispatch(userLoggedIn({ 
+                                accessToken: currentAccessToken,
+                                refreshToken: currentRefreshToken,
+                                user: data.user,
+                            }));
+                        }
+                    }
                 } catch (error) {
                     console.error("Load user failed:", error);
                 }
