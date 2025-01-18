@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
-import { Loader, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useUpdateTourStatusMutation } from '@/redux/feautures/user/userApi';
 
 // Dynamically import Joyride to avoid SSR issues
@@ -11,62 +11,35 @@ const Joyride = dynamic(
   { ssr: false }
 );
 
-// Interfaces
-interface TourStep {
-  target: string;
-  content: string;
-  disableBeacon?: boolean;
-  placement?: 'top' | 'bottom' | 'left' | 'right' | 'center';
-  title?: string;
-}
-
 interface DashboardTourProps {
   children: React.ReactNode;
   isAvatarModalOpen: boolean;
+  isLoadingUser?: boolean; // Add loading prop
 }
 
-interface JoyrideStyles {
-  options: {
-    primaryColor: string;
-    zIndex: number;
-    arrowColor: string;
-    backgroundColor: string;
-    overlayColor: string;
-    textColor: string;
-  };
-  tooltipContainer: {
-    textAlign: 'left' | 'center' | 'right';
-  };
-  buttonNext: {
-    backgroundColor: string;
-  };
-  buttonBack: {
-    marginRight: number;
-  };
-  spotlight: {
-    backgroundColor: string;
-  };
-}
-
-interface JoyrideCallbackData {
-  action: string;
-  index: number;
-  type: string;
-  status: string;
-}
-
-const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOpen }) => {
-  // State management
+const DashboardTour: React.FC<DashboardTourProps> = ({ 
+  children, 
+  isAvatarModalOpen,
+  isLoadingUser = false 
+}) => {
   const [runTour, setRunTour] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isTourReady, setIsTourReady] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   
-  // Redux hooks
   const user = useSelector((state: RootState) => state.auth.user);
   const [updateTourStatus] = useUpdateTourStatusMutation();
 
-  // Tour steps configuration
-  const steps: TourStep[] = [
+  // Only set tour ready when we have definitive user data
+  useEffect(() => {
+    if (!isLoadingUser && user) {
+      setIsTourReady(true);
+      if (!user.tourViewed && !isAvatarModalOpen && user.avatar) {
+        setRunTour(true);
+      }
+    }
+  }, [isLoadingUser, user, isAvatarModalOpen]);
+
+  const steps =[
     {
       target: '[data-tutorial="notifications"]',
       content: 'Get notified about your upcoming sessions and important updates',
@@ -98,8 +71,7 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOp
     }
   ];
 
-  // Joyride styles
-  const tourStyles: JoyrideStyles = {
+  const tourStyles = {
     options: {
       primaryColor: '#2563eb',
       zIndex: 9999,
@@ -109,7 +81,7 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOp
       textColor: '#1f2937'
     },
     tooltipContainer: {
-      textAlign: 'left'
+      textAlign: 'left' as const
     },
     buttonNext: {
       backgroundColor: '#2563eb'
@@ -122,24 +94,11 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOp
     }
   };
 
-  // Effects
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (mounted && !user?.tourViewed && !isAvatarModalOpen && user?.avatar) {
-      setRunTour(true);
-    }
-  }, [isAvatarModalOpen, user, mounted]);
-
-  // Handlers
   const handleTourCallback = async (data: any) => {
     const { status, type } = data;
   
-    // Check if tour is finished or skipped
     if ((type === 'tour:end' && status === 'finished') || status === 'skipped') {
-      setIsLoading(true);
+      setIsUpdating(true);
       try {
         const result = await updateTourStatus().unwrap();
         if (result.success) {
@@ -148,22 +107,20 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ children, isAvatarModalOp
       } catch (error) {
         console.error('Failed to update tour status:', error);
       } finally {
-        setIsLoading(false);
+        setIsUpdating(false);
       }
     }
   };
 
-  if (!mounted) return <>{children}</>;
-
   return (
     <>
-      {isLoading && (
+      {isUpdating && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
           <Loader2 className="animate-spin text-white w-8 h-8" />
         </div>
       )}
       
-      {mounted && !user?.tourViewed && (
+      {isTourReady && !user?.tourViewed && (
         <Joyride
           steps={steps}
           run={runTour}
