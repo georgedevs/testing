@@ -118,8 +118,17 @@ const CounselorSessionPage = () => {
     setError('');
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/meeting-token/${activeSession.booking._id}`, {
-        credentials: 'include'
+
+      const accessToken = localStorage.getItem('access_token');
+      
+      if (!accessToken) {
+        throw new Error('Authentication token not found. Please log in again.');
+      }
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/meeting-token/${activeSession.booking._id}`,   {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
       });
       
       if (!response.ok) {
@@ -171,13 +180,22 @@ const CounselorSessionPage = () => {
         await callFrame.leave();
         setCallFrame(null);
       }
-      
+
       if (activeSession?.booking?._id) {
+        const accessToken = localStorage.getItem('access_token');
+
+      if (!accessToken) {
+        throw new Error('Authentication token not found');
+      }
+      
         await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/complete/${activeSession.booking._id}`, {
           method: 'POST',
-          credentials: 'include'
-        });
-      }
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      )}
+        
       await router.push('/counselor/history');
 
       setTimeout(() => {

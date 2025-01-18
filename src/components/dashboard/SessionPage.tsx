@@ -131,9 +131,21 @@ const SessionPage = () => {
     setError('');
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/meeting-token/${activeBooking.booking._id}`, {
-        credentials: 'include'
-      });
+      // Get access token from localStorage
+      const accessToken = localStorage.getItem('access_token');
+      
+      if (!accessToken) {
+        throw new Error('Authentication token not found. Please log in again.');
+      }
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/meeting-token/${activeBooking.booking._id}`, 
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      );
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -235,10 +247,21 @@ const SessionPage = () => {
       }
       
       if (activeBooking?.booking?._id) {
-        await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/complete/${activeBooking.booking._id}`, {
-          method: 'POST',
-          credentials: 'include'
-        });
+        const accessToken = localStorage.getItem('access_token');
+        
+        if (!accessToken) {
+          throw new Error('Authentication token not found');
+        }
+
+        await fetch(
+          `${process.env.NEXT_PUBLIC_SERVER_URL}/complete/${activeBooking.booking._id}`, 
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            }
+          }
+        );
       }
       
       await router.push('/dashboard/history');
