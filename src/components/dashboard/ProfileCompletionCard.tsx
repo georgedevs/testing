@@ -47,7 +47,6 @@ const getIncompleteFields = (user: User | null): string[] => {
     username: 'Username',
     age: 'Age',
     marriageYears: 'Years of Marriage',
-    preferredCounselorGender: 'Preferred Counselor Gender'
   };
   
   return Object.entries(requiredFields)
