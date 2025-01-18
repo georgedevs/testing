@@ -56,7 +56,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ user }) => {
       'username',
       'age',
       'marriageYears',
-      'preferredCounselorGender',
     ];
     
     const completedFields = fields.filter(field => {
