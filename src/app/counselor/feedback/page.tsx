@@ -51,7 +51,7 @@ const CounselorFeedbackPage = () => {
         <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900">
           <DashboardHeader />
           <CounselorSidebar />
-          <main className="lg:ml-72 lg:pt-10 p-4 lg:p-6 mt-16 ">
+          <main className="lg:ml-72 p-4 lg:p-6 lg:mt-16 mt-4">
             <div className="max-w-screen-2xl mx-auto space-y-6">
               {/* Header Section */}
               <div className="p-6 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl shadow-gray-900/10">
