@@ -29,7 +29,6 @@ const calculateProfileCompletion = (user: User | null): number => {
     'username',
     'age',
     'marriageYears',
-    'preferredCounselorGender',
   ];
   
   const completedFields = fields.filter(field => {
