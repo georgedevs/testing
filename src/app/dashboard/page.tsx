@@ -18,11 +18,9 @@ import DashboardTour from '@/components/dashboard/DashboardTour';
 const Page = () => {
   const { isAuthenticated, userRole, isLoading } = useAuth();
   const user = useSelector((state: RootState) => state.auth.user);
-  const { data: userData, refetch: refetchUser, isLoading:userDataLoading } = useLoadUserQuery((undefined), {
+  const { data: userData, refetch: refetchUser } = useLoadUserQuery((undefined), {
     skip: !isAuthenticated,
   });
-
-  const isLoadingUser = isLoading || userDataLoading;
   
   const { 
     showAvatarModal, 
@@ -42,7 +40,7 @@ const Page = () => {
   return (
     <>
       <ProtectedRoute allowedRoles={['client']}>
-      <DashboardTour isAvatarModalOpen={showAvatarModal}  isLoadingUser={isLoadingUser}>
+      <DashboardTour isAvatarModalOpen={showAvatarModal}>
         <Heading 
           title="Dashboard"
           description="MiCounselor Dashboard"
