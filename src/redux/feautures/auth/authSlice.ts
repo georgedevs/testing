@@ -1,10 +1,10 @@
 // src/redux/features/auth/authSlice.ts
 import { AuthState, IUser } from "@/redux/types/auth";
 import { tokenService } from "@/utils/tokenService";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";;
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const initialState: AuthState = {
-    token: tokenService.getToken() || "",
+    token: tokenService.getAccessToken() || "",
     activationToken: "",
     user: null,
     isAuthenticated: tokenService.isAuthenticated(),
@@ -27,7 +27,7 @@ const authSlice = createSlice({
             state.token = "";
             state.user = null;
             state.isAuthenticated = false;
-            tokenService.removeToken();
+            tokenService.clearTokens();
         },
         updateUserAvatar: (state, action: PayloadAction<{ avatarId: string; imageUrl: string }>) => {
             if (state.user) {

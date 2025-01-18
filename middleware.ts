@@ -4,19 +4,14 @@ import type { NextRequest } from 'next/server';
 
 const publicRoutes = ['/', '/signin', '/signup', '/forgot-password', '/reset-password', '/about', '/resources', '/stories'];
 
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
     const path = request.nextUrl.pathname;
     const isPublicPath = publicRoutes.includes(path);
 
-    // Check for token in localStorage (via cookie since we can't access localStorage in middleware)
-    const token = request.cookies.get('access_token')?.value || '';
-
-    if (!isPublicPath && !token) {
-        return NextResponse.redirect(new URL('/signin', request.url));
-    }
-
-    if (isPublicPath && token) {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
+    // We'll check authentication client-side since we can't access localStorage in middleware
+    // This middleware will only handle public route redirects
+    if (isPublicPath) {
+        return NextResponse.next();
     }
 
     return NextResponse.next();

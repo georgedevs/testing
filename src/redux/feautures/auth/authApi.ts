@@ -13,6 +13,7 @@ interface LoginResponse {
   success: boolean;
   user: IUser;
   accessToken: string;
+  refreshToken:string;
 }
 
 type RegistrationData = {
@@ -60,14 +61,16 @@ export const authApi = apiSlice.injectEndpoints({
       query: (credentials) => ({
           url: "login",
           method: "POST",
-          body: credentials,
-          credentials: "include" as const, // Keep this for refresh token cookie
+          body: credentials
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
           try {
               const result = await queryFulfilled;
-              // Store access token in localStorage
-              tokenService.setToken(result.data.accessToken);
+              // Store both tokens in localStorage
+              tokenService.setTokens(
+                  result.data.accessToken,
+                  result.data.refreshToken
+              );
               dispatch(
                   userLoggedIn({
                       accessToken: result.data.accessToken,
@@ -76,36 +79,30 @@ export const authApi = apiSlice.injectEndpoints({
               );
           } catch (error: any) {
               console.error("Login error:", error);
-              // Ensure token is removed on login error
-              tokenService.removeToken();
+              tokenService.clearTokens();
           }
       },
   }),
-    logout: builder.mutation<{ success: boolean; message: string }, void>({
-      query: () => ({
-          url: "logout",
-          method: "POST",
-          credentials: "include" as const, // Keep this to clear refresh token cookie
-          // Include access token in header for final authenticated request
-          headers: {
-              Authorization: `Bearer ${tokenService.getToken()}`
-          }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-          try {
-              await queryFulfilled;
-              // Clear access token from localStorage
-              tokenService.removeToken();
-              // Reset API state and logout
-              dispatch(apiSlice.util.resetApiState());
-              dispatch(userLoggedOut());
-          } catch (error) {
-              console.error("Logout error:", error);
-              // Still remove token on error to ensure clean logout
-              tokenService.removeToken();
-          }
-      },
-  }),
+  logout: builder.mutation<{ success: boolean; message: string }, void>({
+    query: () => ({
+        url: "logout",
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${tokenService.getAccessToken()}`
+        }
+    }),
+    async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+            await queryFulfilled;
+            tokenService.clearTokens();
+            dispatch(apiSlice.util.resetApiState());
+            dispatch(userLoggedOut());
+        } catch (error) {
+            console.error("Logout error:", error);
+            tokenService.clearTokens();
+        }
+    },
+}),
     forgotPassword: builder.mutation({
       query: (email) => ({
         url: "forgot-password",
