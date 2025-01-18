@@ -2,6 +2,7 @@ import { IUser } from "@/redux/types/auth";
 import { apiSlice } from "../api/apiSlice";
 import { userLoggedIn, userLoggedOut, userRegistration } from "./authSlice";
 import { AvatarResponse, UpdateAvatarResponse } from "@/types/avatar";
+import { tokenService } from "@/utils/tokenService";
 
 interface LoginRequest {
   email: string;
@@ -57,41 +58,54 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     login: builder.mutation<LoginResponse, LoginRequest>({
       query: (credentials) => ({
-        url: "login",
-        method: "POST",
-        body: credentials,
-        credentials: "include" as const,
+          url: "login",
+          method: "POST",
+          body: credentials,
+          credentials: "include" as const, // Keep this for refresh token cookie
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const result = await queryFulfilled;
-          dispatch(
-            userLoggedIn({
-              accessToken: result.data.accessToken,
-              user: result.data.user,
-            })
-          );
-        } catch (error: any) {
-          console.error("Login error:", error);
-        }
+          try {
+              const result = await queryFulfilled;
+              // Store access token in localStorage
+              tokenService.setToken(result.data.accessToken);
+              dispatch(
+                  userLoggedIn({
+                      accessToken: result.data.accessToken,
+                      user: result.data.user,
+                  })
+              );
+          } catch (error: any) {
+              console.error("Login error:", error);
+              // Ensure token is removed on login error
+              tokenService.removeToken();
+          }
       },
-    }),
+  }),
     logout: builder.mutation<{ success: boolean; message: string }, void>({
       query: () => ({
-        url: "logout",
-        method: "POST",
-        credentials: "include" as const,
+          url: "logout",
+          method: "POST",
+          credentials: "include" as const, // Keep this to clear refresh token cookie
+          // Include access token in header for final authenticated request
+          headers: {
+              Authorization: `Bearer ${tokenService.getToken()}`
+          }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          dispatch(apiSlice.util.resetApiState());
-          dispatch(userLoggedOut());
-        } catch (error) {
-          console.error("Logout error:", error);
-        }
+          try {
+              await queryFulfilled;
+              // Clear access token from localStorage
+              tokenService.removeToken();
+              // Reset API state and logout
+              dispatch(apiSlice.util.resetApiState());
+              dispatch(userLoggedOut());
+          } catch (error) {
+              console.error("Logout error:", error);
+              // Still remove token on error to ensure clean logout
+              tokenService.removeToken();
+          }
       },
-    }),
+  }),
     forgotPassword: builder.mutation({
       query: (email) => ({
         url: "forgot-password",

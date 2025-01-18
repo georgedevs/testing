@@ -5,6 +5,7 @@ import Loader from '@/components/Loader';
 import { useLoadUserQuery } from '@/redux/feautures/api/apiSlice';
 import { useSelector } from 'react-redux';
 import OfflineStatusHandler from '@/components/OfflineStatusHandler';
+import { useTokenSync } from './hooks/useTokenSync';
 
 const publicRoutes = [
     '/',
@@ -25,6 +26,7 @@ export default function AuthWrapper({
 }: {
     children: React.ReactNode;
 }) {
+    useTokenSync()
     const { isLoading, isError } = useLoadUserQuery(undefined, {
         refetchOnMountOrArgChange: true,
         refetchOnFocus: true,

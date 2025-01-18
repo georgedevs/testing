@@ -1,7 +1,9 @@
+// src/redux/features/api/apiSlice.ts
 import { createApi, fetchBaseQuery, BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import { userLoggedIn, userLoggedOut } from "../auth/authSlice";
 import { Mutex } from 'async-mutex';
 import { IUser } from "@/redux/types/auth";
+import { tokenService } from "@/utils/tokenService";
 
 interface RefreshResponse {
     success: boolean;
@@ -9,26 +11,29 @@ interface RefreshResponse {
     user: IUser;
 }
 
-// Create a mutex to prevent multiple refresh token calls
 const mutex = new Mutex();
 
 const baseQuery = fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_SERVER_URL,
     credentials: 'include',
+    prepareHeaders: (headers) => {
+        const token = tokenService.getToken();
+        if (token) {
+            headers.set('authorization', `Bearer ${token}`);
+        }
+        return headers;
+    },
 });
 
 const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (args, api, extraOptions) => {
-    // Wait until the mutex is available without locking it
     await mutex.waitForUnlock();
     let result = await baseQuery(args, api, extraOptions);
 
     if (result.error && result.error.status === 401) {
-        // Checking whether the mutex is locked
         if (!mutex.isLocked()) {
             const release = await mutex.acquire();
 
             try {
-                // Try to get a new token
                 const refreshResult = await baseQuery(
                     { 
                         url: 'refresh',
@@ -39,7 +44,8 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
                 ) as { data: RefreshResponse };
 
                 if (refreshResult.data?.success) {
-                    // Store the new token
+                    // Store new token
+                    tokenService.setToken(refreshResult.data.accessToken);
                     api.dispatch(userLoggedIn({
                         accessToken: refreshResult.data.accessToken,
                         user: refreshResult.data.user
@@ -47,14 +53,13 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
                     // Retry the initial query
                     result = await baseQuery(args, api, extraOptions);
                 } else {
+                    tokenService.removeToken();
                     api.dispatch(userLoggedOut());
                 }
             } finally {
-                // Release must be called once the mutex should be released again.
                 release();
             }
         } else {
-            // Wait until the mutex is available without locking it
             await mutex.waitForUnlock();
             result = await baseQuery(args, api, extraOptions);
         }
@@ -90,6 +95,7 @@ export const apiSlice = createApi({
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data } = await queryFulfilled;
+                    tokenService.setToken(data.accessToken);
                     dispatch(userLoggedIn({ 
                         accessToken: data.accessToken,
                         user: data.user,
@@ -101,5 +107,4 @@ export const apiSlice = createApi({
         }),
     }),
 });
-
 export const { useLoadUserQuery } = apiSlice;
