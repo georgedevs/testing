@@ -7,6 +7,7 @@ export const useAvatarCheck = () => {
   const [requiresAvatar, setRequiresAvatar] = useState(false);
   const [isProcessingUpdate, setIsProcessingUpdate] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isAvatarModalComplete, setIsAvatarModalComplete] = useState(false);
   const user = useSelector((state: RootState) => state.auth.user);
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
@@ -17,6 +18,9 @@ export const useAvatarCheck = () => {
       if (needsAvatar && !isInitialized) {
         setShowAvatarModal(true);
         setIsInitialized(true);
+        setIsAvatarModalComplete(false);
+      } else if (!needsAvatar) {
+        setIsAvatarModalComplete(true);
       }
     } else {
       setRequiresAvatar(false);
@@ -39,10 +43,14 @@ export const useAvatarCheck = () => {
 
   const handleAvatarUpdated = async () => {
     setIsProcessingUpdate(true);
-    await new Promise(resolve => setTimeout(resolve, 100));
-    setRequiresAvatar(false);
-    setShowAvatarModal(false);
-    setIsProcessingUpdate(false);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      setRequiresAvatar(false);
+      setShowAvatarModal(false);
+      setIsAvatarModalComplete(true);
+    } finally {
+      setIsProcessingUpdate(false);
+    }
   };
 
   return {
@@ -51,6 +59,7 @@ export const useAvatarCheck = () => {
     requiresAvatar,
     checkAvatarRequirement,
     handleAvatarUpdated,
-    isAvatarModalComplete: !requiresAvatar && isInitialized
+    isAvatarModalComplete,
+    isProcessingUpdate
   };
 };

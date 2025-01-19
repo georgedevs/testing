@@ -24,27 +24,44 @@ const DashboardTour: React.FC<DashboardTourProps> = ({
   const [runTour, setRunTour] = useState(false);
   const [isTourReady, setIsTourReady] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
   
   const user = useSelector((state: RootState) => state.auth.user);
   const [updateTourStatus] = useUpdateTourStatusMutation();
-  const { isAvatarModalComplete, showAvatarModal } = useAvatarCheck();
+  const { isAvatarModalComplete, showAvatarModal, isProcessingUpdate } = useAvatarCheck();
 
-  // Enhanced tour readiness check
   useEffect(() => {
-    if (!isLoadingUser && user && isAvatarModalComplete) {
-      setIsTourReady(true);
-      // Only run tour if it hasn't been viewed and avatar selection is complete
-      if (!user.tourViewed && !showAvatarModal) {
-        const timer = setTimeout(() => {
-          setRunTour(true);
-        }, 300); // Small delay to ensure smooth transition after avatar modal
-        return () => clearTimeout(timer);
+    // Wait for everything to be ready
+    if (!isLoadingUser && user && isAvatarModalComplete && !isProcessingUpdate) {
+      // Initialize tour state
+      if (!hasInitialized) {
+        setIsTourReady(true);
+        setHasInitialized(true);
+        
+        // Start tour if it hasn't been viewed
+        if (!user.tourViewed && !showAvatarModal) {
+          const timer = setTimeout(() => {
+            setRunTour(true);
+          }, 500);
+          return () => clearTimeout(timer);
+        }
       }
     } else {
-      setIsTourReady(false);
-      setRunTour(false);
+      // Reset states if conditions aren't met
+      if (!isAvatarModalComplete || isProcessingUpdate) {
+        setIsTourReady(false);
+        setRunTour(false);
+      }
     }
-  }, [isLoadingUser, user, isAvatarModalComplete, showAvatarModal, user?.tourViewed]);
+  }, [
+    isLoadingUser,
+    user,
+    isAvatarModalComplete,
+    showAvatarModal,
+    isProcessingUpdate,
+    hasInitialized,
+    user?.tourViewed
+  ]);
 
   const steps = [
     {
@@ -118,6 +135,7 @@ const DashboardTour: React.FC<DashboardTourProps> = ({
       }
     }
   };
+
 
   return (
     <>
