@@ -4,8 +4,8 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { Loader2 } from 'lucide-react';
 import { useUpdateTourStatusMutation } from '@/redux/feautures/user/userApi';
-import { useAvatarCheck } from '@/app/hooks/useAvatarCheck';
 
+// Dynamically import Joyride to avoid SSR issues
 const Joyride = dynamic(
   () => import('react-joyride').then((mod) => mod.default),
   { ssr: false }
@@ -13,58 +13,33 @@ const Joyride = dynamic(
 
 interface DashboardTourProps {
   children: React.ReactNode;
-  isLoadingUser?: boolean;
+  isAvatarModalOpen: boolean;
+  isLoadingUser?: boolean; // Add loading prop
 }
 
 const DashboardTour: React.FC<DashboardTourProps> = ({ 
   children, 
+  isAvatarModalOpen,
   isLoadingUser = false 
 }) => {
   const [runTour, setRunTour] = useState(false);
   const [isTourReady, setIsTourReady] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [hasInitialized, setHasInitialized] = useState(false);
   
   const user = useSelector((state: RootState) => state.auth.user);
   const [updateTourStatus] = useUpdateTourStatusMutation();
-  const { isAvatarModalComplete, showAvatarModal, isProcessingUpdate } = useAvatarCheck();
 
+  // Only set tour ready when we have definitive user data
   useEffect(() => {
-    // Only initialize when:
-    // 1. User data is loaded (!isLoadingUser && user)
-    // 2. Avatar modal is complete (isAvatarModalComplete)
-    // 3. No avatar update is in progress (!isProcessingUpdate)
-    // 4. No avatar modal is showing (!showAvatarModal)
-    if (!isLoadingUser && user && isAvatarModalComplete && !isProcessingUpdate && !showAvatarModal) {
-      // Initialize tour state if not already initialized
-      if (!hasInitialized) {
-        setIsTourReady(true);
-        setHasInitialized(true);
-        
-        // Start tour if it hasn't been viewed yet
-        if (!user.tourViewed) {
-          const timer = setTimeout(() => {
-            setRunTour(true);
-          }, 500);
-          return () => clearTimeout(timer);
-        }
+    if (!isLoadingUser && user) {
+      setIsTourReady(true);
+      if (!user.tourViewed && !isAvatarModalOpen && user.avatar) {
+        setRunTour(true);
       }
-    } else {
-      // Reset states if conditions aren't met
-      setIsTourReady(false);
-      setRunTour(false);
     }
-  }, [
-    isLoadingUser,
-    user,
-    isAvatarModalComplete,
-    showAvatarModal,
-    isProcessingUpdate,
-    hasInitialized,
-    user?.tourViewed
-  ]);
+  }, [isLoadingUser, user, isAvatarModalOpen]);
 
-  const steps = [
+  const steps =[
     {
       target: '[data-tutorial="notifications"]',
       content: 'Get notified about your upcoming sessions and important updates',
