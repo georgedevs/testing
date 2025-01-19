@@ -42,7 +42,7 @@ const Page = () => {
   return (
     <>
       <ProtectedRoute allowedRoles={['client']}>
-      <DashboardTour isAvatarModalOpen={showAvatarModal}  isLoadingUser={isLoadingUser}>
+      <DashboardTour isLoadingUser={isLoadingUser}>
         <Heading 
           title="Dashboard"
           description="MiCounselor Dashboard"

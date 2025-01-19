@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { Loader2 } from 'lucide-react';
 import { useUpdateTourStatusMutation } from '@/redux/feautures/user/userApi';
+import { useAvatarCheck } from '@/app/hooks/useAvatarCheck';
 
 // Dynamically import Joyride to avoid SSR issues
 const Joyride = dynamic(
@@ -13,13 +14,11 @@ const Joyride = dynamic(
 
 interface DashboardTourProps {
   children: React.ReactNode;
-  isAvatarModalOpen: boolean;
-  isLoadingUser?: boolean; // Add loading prop
+  isLoadingUser?: boolean;
 }
 
 const DashboardTour: React.FC<DashboardTourProps> = ({ 
   children, 
-  isAvatarModalOpen,
   isLoadingUser = false 
 }) => {
   const [runTour, setRunTour] = useState(false);
@@ -28,18 +27,26 @@ const DashboardTour: React.FC<DashboardTourProps> = ({
   
   const user = useSelector((state: RootState) => state.auth.user);
   const [updateTourStatus] = useUpdateTourStatusMutation();
+  const { isAvatarModalComplete, showAvatarModal } = useAvatarCheck();
 
-  // Only set tour ready when we have definitive user data
+  // Enhanced tour readiness check
   useEffect(() => {
-    if (!isLoadingUser && user) {
+    if (!isLoadingUser && user && isAvatarModalComplete) {
       setIsTourReady(true);
-      if (!user.tourViewed && !isAvatarModalOpen && user.avatar) {
-        setRunTour(true);
+      // Only run tour if it hasn't been viewed and avatar selection is complete
+      if (!user.tourViewed && !showAvatarModal) {
+        const timer = setTimeout(() => {
+          setRunTour(true);
+        }, 300); // Small delay to ensure smooth transition after avatar modal
+        return () => clearTimeout(timer);
       }
+    } else {
+      setIsTourReady(false);
+      setRunTour(false);
     }
-  }, [isLoadingUser, user, isAvatarModalOpen]);
+  }, [isLoadingUser, user, isAvatarModalComplete, showAvatarModal, user?.tourViewed]);
 
-  const steps =[
+  const steps = [
     {
       target: '[data-tutorial="notifications"]',
       content: 'Get notified about your upcoming sessions and important updates',

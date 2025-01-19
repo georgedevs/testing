@@ -6,6 +6,7 @@ export const useAvatarCheck = () => {
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [requiresAvatar, setRequiresAvatar] = useState(false);
   const [isProcessingUpdate, setIsProcessingUpdate] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const user = useSelector((state: RootState) => state.auth.user);
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
@@ -13,21 +14,32 @@ export const useAvatarCheck = () => {
     if (isAuthenticated && user && !isProcessingUpdate) {
       const needsAvatar = !user?.avatar?.avatarId;
       setRequiresAvatar(needsAvatar);
-      setShowAvatarModal(needsAvatar);
+      if (needsAvatar && !isInitialized) {
+        setShowAvatarModal(true);
+        setIsInitialized(true);
+      }
     } else {
       setRequiresAvatar(false);
       setShowAvatarModal(false);
     }
-  }, [isAuthenticated, user, isProcessingUpdate]);
+  }, [isAuthenticated, user, isProcessingUpdate, isInitialized]);
 
+  // Initial check with delay to ensure proper loading order
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      checkAvatarRequirement();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Watch for user changes
   useEffect(() => {
     checkAvatarRequirement();
   }, [checkAvatarRequirement]);
 
   const handleAvatarUpdated = async () => {
     setIsProcessingUpdate(true);
-    // Wait for next tick to ensure state updates are processed
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise(resolve => setTimeout(resolve, 100));
     setRequiresAvatar(false);
     setShowAvatarModal(false);
     setIsProcessingUpdate(false);
@@ -38,6 +50,7 @@ export const useAvatarCheck = () => {
     setShowAvatarModal,
     requiresAvatar,
     checkAvatarRequirement,
-    handleAvatarUpdated
+    handleAvatarUpdated,
+    isAvatarModalComplete: !requiresAvatar && isInitialized
   };
 };
