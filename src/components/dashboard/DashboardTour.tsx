@@ -6,7 +6,6 @@ import { Loader2 } from 'lucide-react';
 import { useUpdateTourStatusMutation } from '@/redux/feautures/user/userApi';
 import { useAvatarCheck } from '@/app/hooks/useAvatarCheck';
 
-// Dynamically import Joyride to avoid SSR issues
 const Joyride = dynamic(
   () => import('react-joyride').then((mod) => mod.default),
   { ssr: false }
@@ -31,15 +30,19 @@ const DashboardTour: React.FC<DashboardTourProps> = ({
   const { isAvatarModalComplete, showAvatarModal, isProcessingUpdate } = useAvatarCheck();
 
   useEffect(() => {
-    // Wait for everything to be ready
-    if (!isLoadingUser && user && isAvatarModalComplete && !isProcessingUpdate) {
-      // Initialize tour state
+    // Only initialize when:
+    // 1. User data is loaded (!isLoadingUser && user)
+    // 2. Avatar modal is complete (isAvatarModalComplete)
+    // 3. No avatar update is in progress (!isProcessingUpdate)
+    // 4. No avatar modal is showing (!showAvatarModal)
+    if (!isLoadingUser && user && isAvatarModalComplete && !isProcessingUpdate && !showAvatarModal) {
+      // Initialize tour state if not already initialized
       if (!hasInitialized) {
         setIsTourReady(true);
         setHasInitialized(true);
         
-        // Start tour if it hasn't been viewed
-        if (!user.tourViewed && !showAvatarModal) {
+        // Start tour if it hasn't been viewed yet
+        if (!user.tourViewed) {
           const timer = setTimeout(() => {
             setRunTour(true);
           }, 500);
@@ -48,10 +51,8 @@ const DashboardTour: React.FC<DashboardTourProps> = ({
       }
     } else {
       // Reset states if conditions aren't met
-      if (!isAvatarModalComplete || isProcessingUpdate) {
-        setIsTourReady(false);
-        setRunTour(false);
-      }
+      setIsTourReady(false);
+      setRunTour(false);
     }
   }, [
     isLoadingUser,
@@ -135,7 +136,6 @@ const DashboardTour: React.FC<DashboardTourProps> = ({
       }
     }
   };
-
 
   return (
     <>

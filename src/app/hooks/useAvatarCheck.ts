@@ -32,7 +32,7 @@ export const useAvatarCheck = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       checkAvatarRequirement();
-    }, 100);
+    }, 300); // Increased from 100ms to 300ms
     return () => clearTimeout(timer);
   }, []);
 
@@ -44,7 +44,22 @@ export const useAvatarCheck = () => {
   const handleAvatarUpdated = async () => {
     setIsProcessingUpdate(true);
     try {
+      // Increased timeout to ensure state updates have time to propagate
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Update states in sequence
+      setRequiresAvatar(false);
+      
+      // Add another small delay before closing modal
       await new Promise(resolve => setTimeout(resolve, 100));
+      setShowAvatarModal(false);
+      
+      // Final delay before marking as complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+      setIsAvatarModalComplete(true);
+    } catch (error) {
+      console.error('Error updating avatar status:', error);
+      // Reset states on error
       setRequiresAvatar(false);
       setShowAvatarModal(false);
       setIsAvatarModalComplete(true);
