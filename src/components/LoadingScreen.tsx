@@ -1,34 +1,52 @@
-'use client'
+'use client';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const LoadingScreen = () => {
+interface LoadingScreenProps {
+  forceLoading?: boolean;
+}
+
+const LoadingScreen: React.FC<LoadingScreenProps> = ({ forceLoading }) => {
   const [isLoading, setIsLoading] = useState(true);
   const pathname = usePathname();
 
   useEffect(() => {
-    // Only show loading screen on main page
-    if (pathname !== '/') {
+    if (forceLoading === false) {
+      // If explicitly set to not loading, remove immediately
       setIsLoading(false);
       return;
     }
-    
-    // Minimum loading time of 2 seconds
+
+    // For homepage, enforce minimum 2 second loading
+    if (pathname === '/') {
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+
+    // For other pages, show loading but don't enforce minimum time
+    setIsLoading(true);
+
+    // Small delay for other pages to prevent flash
     const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
+      if (!forceLoading) {
+        setIsLoading(false);
+      }
+    }, 300);
 
     return () => clearTimeout(timer);
-  }, [pathname]);
+  }, [pathname, forceLoading]);
 
   return (
     <AnimatePresence>
       {isLoading && (
         <motion.div
-          initial={{ opacity: 1 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.3 }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-900"
         >
           <style jsx global>{`
