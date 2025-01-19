@@ -5,7 +5,6 @@ import { RootState } from '@/redux/store';
 import { Loader2 } from 'lucide-react';
 import { useUpdateTourStatusMutation } from '@/redux/feautures/user/userApi';
 import { Styles } from 'react-joyride';
-import { useAvatarCheck } from '@/app/hooks/useAvatarCheck';
 
 // Dynamically import Joyride to avoid SSR issues
 const Joyride = dynamic(
@@ -24,39 +23,21 @@ interface TourStep {
 
 interface CounselorDashboardTourProps {
   children: React.ReactNode;
-  isLoadingUser?: boolean;
+  isAvatarModalOpen: boolean;
 }
 
 const CounselorDashboardTour: React.FC<CounselorDashboardTourProps> = ({ 
-  children,
-  isLoadingUser = false
+  children, 
+  isAvatarModalOpen 
 }) => {
   // State management
   const [runTour, setRunTour] = useState(false);
-  const [isTourReady, setIsTourReady] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   // Redux hooks
   const user = useSelector((state: RootState) => state.auth.user);
   const [updateTourStatus] = useUpdateTourStatusMutation();
-  const { isAvatarModalComplete, showAvatarModal } = useAvatarCheck();
-
-  // Enhanced tour readiness check
-  useEffect(() => {
-    if (!isLoadingUser && user && isAvatarModalComplete) {
-      setIsTourReady(true);
-      // Only run tour if it hasn't been viewed and avatar selection is complete
-      if (!user.tourViewed && !showAvatarModal) {
-        const timer = setTimeout(() => {
-          setRunTour(true);
-        }, 300); // Small delay to ensure smooth transition after avatar modal
-        return () => clearTimeout(timer);
-      }
-    } else {
-      setIsTourReady(false);
-      setRunTour(false);
-    }
-  }, [isLoadingUser, user, isAvatarModalComplete, showAvatarModal, user?.tourViewed]);
 
   // Tour steps configuration
   const steps: TourStep[] = [
@@ -102,7 +83,7 @@ const CounselorDashboardTour: React.FC<CounselorDashboardTourProps> = ({
       textColor: '#1f2937'
     },
     tooltipContainer: {
-      textAlign: 'left' as const,
+      textAlign: 'left' as const, 
     },
     buttonNext: {
       backgroundColor: '#2563eb'
@@ -115,13 +96,24 @@ const CounselorDashboardTour: React.FC<CounselorDashboardTourProps> = ({
     }
   };
 
+  // Effects
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && !user?.tourViewed && !isAvatarModalOpen && user?.avatar) {
+      setRunTour(true);
+    }
+  }, [isAvatarModalOpen, user, mounted]);
+
   // Handlers
   const handleTourCallback = async (data: any) => {
     const { status, type } = data;
   
     // Check if tour is finished or skipped
     if ((type === 'tour:end' && status === 'finished') || status === 'skipped') {
-      setIsUpdating(true);
+      setIsLoading(true);
       try {
         const result = await updateTourStatus().unwrap();
         if (result.success) {
@@ -130,20 +122,22 @@ const CounselorDashboardTour: React.FC<CounselorDashboardTourProps> = ({
       } catch (error) {
         console.error('Failed to update tour status:', error);
       } finally {
-        setIsUpdating(false);
+        setIsLoading(false);
       }
     }
   };
 
+  if (!mounted) return <>{children}</>;
+
   return (
     <>
-      {isUpdating && (
+      {isLoading && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
           <Loader2 className="animate-spin text-white w-8 h-8" />
         </div>
       )}
       
-      {isTourReady && !user?.tourViewed && (
+      {mounted && !user?.tourViewed && (
         <Joyride
           steps={steps}
           run={runTour}
