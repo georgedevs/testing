@@ -7,7 +7,6 @@ export const useAvatarCheck = () => {
   const [requiresAvatar, setRequiresAvatar] = useState(false);
   const [isProcessingUpdate, setIsProcessingUpdate] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [isAvatarModalComplete, setIsAvatarModalComplete] = useState(false);
   const user = useSelector((state: RootState) => state.auth.user);
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
@@ -18,9 +17,6 @@ export const useAvatarCheck = () => {
       if (needsAvatar && !isInitialized) {
         setShowAvatarModal(true);
         setIsInitialized(true);
-        setIsAvatarModalComplete(false);
-      } else if (!needsAvatar) {
-        setIsAvatarModalComplete(true);
       }
     } else {
       setRequiresAvatar(false);
@@ -32,7 +28,7 @@ export const useAvatarCheck = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       checkAvatarRequirement();
-    }, 300); // Increased from 100ms to 300ms
+    }, 100);
     return () => clearTimeout(timer);
   }, []);
 
@@ -43,29 +39,10 @@ export const useAvatarCheck = () => {
 
   const handleAvatarUpdated = async () => {
     setIsProcessingUpdate(true);
-    try {
-      // Increased timeout to ensure state updates have time to propagate
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Update states in sequence
-      setRequiresAvatar(false);
-      
-      // Add another small delay before closing modal
-      await new Promise(resolve => setTimeout(resolve, 100));
-      setShowAvatarModal(false);
-      
-      // Final delay before marking as complete
-      await new Promise(resolve => setTimeout(resolve, 100));
-      setIsAvatarModalComplete(true);
-    } catch (error) {
-      console.error('Error updating avatar status:', error);
-      // Reset states on error
-      setRequiresAvatar(false);
-      setShowAvatarModal(false);
-      setIsAvatarModalComplete(true);
-    } finally {
-      setIsProcessingUpdate(false);
-    }
+    await new Promise(resolve => setTimeout(resolve, 100));
+    setRequiresAvatar(false);
+    setShowAvatarModal(false);
+    setIsProcessingUpdate(false);
   };
 
   return {
@@ -74,7 +51,6 @@ export const useAvatarCheck = () => {
     requiresAvatar,
     checkAvatarRequirement,
     handleAvatarUpdated,
-    isAvatarModalComplete,
-    isProcessingUpdate
+    isAvatarModalComplete: !requiresAvatar && isInitialized
   };
 };
