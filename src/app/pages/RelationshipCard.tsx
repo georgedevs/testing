@@ -193,31 +193,47 @@ const RelationshipCards = () => {
                 </motion.h2>
                 
                 <div className="relative">
-                    {showControls && (
-                        <>
-                            <motion.button
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: scrollPosition > 0 ? 1 : 0 }}
-                                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10"
-                                onClick={() => scroll('left')}
-                            >
-                                <div className="p-2 rounded-full bg-white dark:bg-gray-700 shadow-lg">
-                                    <ChevronLeft className="w-6 h-6 text-purple-600 dark:text-orange-500" />
-                                </div>
-                            </motion.button>
+                {showControls && (
+    <>
+        <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: scrollPosition > 0 ? 1 : 0 }}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10"
+            onClick={() => scroll('left')}
+        >
+            <div className="p-2 rounded-full bg-white dark:bg-gray-700 shadow-lg">
+                <ChevronLeft className="w-6 h-6 text-purple-600 dark:text-orange-500" />
+            </div>
+        </motion.button>
 
-                            <motion.button
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: scrollPosition < maxScroll ? 1 : 0 }}
-                                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10"
-                                onClick={() => scroll('right')}
-                            >
-                                <div className="p-2 rounded-full bg-white dark:bg-gray-700 shadow-lg">
-                                    <ChevronRight className="w-6 h-6 text-purple-600 dark:text-orange-500" />
-                                </div>
-                            </motion.button>
-                        </>
-                    )}
+        <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: scrollPosition < maxScroll ? 1 : 0 }}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10"
+            onClick={() => scroll('right')}
+        >
+            <div className="p-2 rounded-full bg-white dark:bg-gray-700 shadow-lg">
+                <ChevronRight className="w-6 h-6 text-purple-600 dark:text-orange-500" />
+            </div>
+        </motion.button>
+
+        {/* Scroll progress indicator */}
+        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex space-x-1 pb-4">
+            <motion.div
+                className="h-1 rounded-full bg-purple-600/30 dark:bg-orange-500/30"
+                style={{ width: '100px' }}
+            >
+                <motion.div 
+                    className="h-full bg-purple-600 dark:bg-orange-500 rounded-full"
+                    style={{ 
+                        width: `${(scrollPosition / maxScroll) * 100}%`,
+                        transition: 'width 0.1s ease-out'
+                    }}
+                />
+            </motion.div>
+        </div>
+    </>
+)}
 
                     <motion.div 
                         ref={scrollContainerRef}
@@ -247,7 +263,7 @@ const RelationshipCards = () => {
                                         }}
                                         className="h-full"
                                     >
-                                        <Card className="group relative overflow-hidden p-6 md:p-8 rounded-2xl w-full h-full transition-all duration-300 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 transform-gpu">
+                                      <Card className="group relative overflow-hidden p-6 md:p-8 rounded-2xl w-full h-full transition-all duration-300 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 transform-gpu hover:shadow-[0_0_15px_-5px] hover:shadow-purple-500/30 dark:hover:shadow-orange-500/30 before:absolute before:inset-0 before:bg-gradient-to-br before:from-purple-600/5 before:to-orange-500/5 dark:before:from-orange-400/5 dark:before:to-purple-500/5 before:opacity-0 before:transition-opacity hover:before:opacity-100">
                                             <motion.div 
                                                 className="absolute inset-0 opacity-0 group-hover:opacity-10 bg-gradient-to-br from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500"
                                                 initial={{ rotate: 0, opacity: 0 }}
