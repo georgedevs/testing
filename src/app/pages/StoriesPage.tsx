@@ -88,41 +88,54 @@ const StoriesPage = () => {
       
       {/* Animated Hero Section */}
       <motion.div 
-        ref={heroRef}
-        style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
-        className="relative pt-16 pb-10 md:pt-24 md:pb-16"
+  ref={heroRef}
+  style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
+  className="relative pt-16 pb-10 md:pt-24 md:pb-16"
+>
+  {/* Background Image Container */}
+  <div className="absolute inset-0">
+    <motion.img
+      initial={{ scale: 1.1, opacity: 0 }}
+      animate={{ scale: 1, opacity: 0.8 }}
+      transition={{ duration: 0.8 }}
+      src="/hero2.jpg"
+      alt="Success stories background"
+      className="object-cover w-full h-full dark:opacity-30"
+    />
+    <div className="absolute inset-0 bg-white/60 dark:bg-gray-900/70 shadow-inner" />
+  </div>
+
+  <motion.div 
+    initial="hidden"
+    animate={isHeroInView ? "visible" : "hidden"}
+    variants={fadeInUpVariants}
+    transition={{ duration: 0.8 }}
+    className="relative z-10 max-w-6xl mx-auto px-4 md:px-8"
+  >
+    <motion.div
+      whileHover={{ scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 300 }}
+      className="p-8 rounded-2xl bg-white/90 dark:bg-gray-800/90 shadow-2xl"
+    >
+      <motion.h1 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="text-3xl md:text-5xl font-bold text-center mb-4 md:mb-6 mt-6 md:mt-10 bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent"
       >
-        <motion.div 
-          initial="hidden"
-          animate={isHeroInView ? "visible" : "hidden"}
-          variants={fadeInUpVariants}
-          transition={{ duration: 0.8 }}
-          className="max-w-6xl mx-auto px-4 md:px-8"
-        >
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 300 }}
-            className="p-8 rounded-2xl bg-white/90 dark:bg-gray-800/90 shadow-2xl"
-          >
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-3xl md:text-5xl font-bold text-center mb-4 md:mb-6 mt-6 md:mt-10 bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent"
-            >
-              Success Stories
-            </motion.h1>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="text-base md:text-xl text-center max-w-3xl mx-auto text-gray-600 dark:text-gray-300"
-            >
-              Real stories from couples who found their way back to connection and understanding through counseling.
-            </motion.p>
-          </motion.div>
-        </motion.div>
-      </motion.div>
+        Success Stories
+      </motion.h1>
+      <motion.p 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.4 }}
+        className="text-base md:text-xl text-center max-w-3xl mx-auto text-gray-600 dark:text-gray-300"
+      >
+        Real stories from couples who found their way back to connection and understanding through counseling.
+      </motion.p>
+    </motion.div>
+  </motion.div>
+</motion.div>
 
       {/* Stories Section */}
       <motion.div 

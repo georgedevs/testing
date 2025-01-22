@@ -100,41 +100,54 @@ const ServicesPage = () => {
       
       {/* Animated Hero Section */}
       <motion.div 
-        ref={heroRef}
-        style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
-        className="relative pt-16 pb-10 md:pt-24 md:pb-16"
+  ref={heroRef}
+  style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
+  className="relative pt-16 pb-10 md:pt-24 md:pb-16"
+>
+  {/* Background Image Container */}
+  <div className="absolute inset-0">
+    <motion.img
+      initial={{ scale: 1.1, opacity: 0 }}
+      animate={{ scale: 1, opacity: 0.8 }}
+      transition={{ duration: 0.8 }}
+      src="/about.webp"
+      alt="Counseling services background"
+      className="object-cover w-full h-full dark:opacity-30"
+    />
+    <div className="absolute inset-0 bg-white/60 dark:bg-gray-900/70 shadow-inner" />
+  </div>
+
+  <motion.div 
+    initial="hidden"
+    animate={isHeroInView ? "visible" : "hidden"}
+    variants={fadeInUpVariants}
+    transition={{ duration: 0.8 }}
+    className="relative z-10 max-w-6xl mx-auto px-4 md:px-8"
+  >
+    <motion.div
+      whileHover={{ scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 300 }}
+      className="p-8 rounded-2xl bg-white/90 dark:bg-gray-800/90 shadow-2xl"
+    >
+      <motion.h1 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="text-3xl md:text-5xl font-bold text-center mb-4 md:mb-6 mt-6 md:mt-10 bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent"
       >
-        <motion.div 
-          initial="hidden"
-          animate={isHeroInView ? "visible" : "hidden"}
-          variants={fadeInUpVariants}
-          transition={{ duration: 0.8 }}
-          className="max-w-6xl mx-auto px-4 md:px-8"
-        >
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 300 }}
-            className="p-8 rounded-2xl bg-white/90 dark:bg-gray-800/90 shadow-2xl"
-          >
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-3xl md:text-5xl font-bold text-center mb-4 md:mb-6 mt-6 md:mt-10 bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent"
-            >
-              Our Counseling Services
-            </motion.h1>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="text-base md:text-xl text-center max-w-3xl mx-auto text-gray-600 dark:text-gray-300"
-            >
-              Comprehensive, compassionate support designed to help couples navigate challenges and rebuild stronger connections.
-            </motion.p>
-          </motion.div>
-        </motion.div>
-      </motion.div>
+        Our Counseling Services
+      </motion.h1>
+      <motion.p 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.4 }}
+        className="text-base md:text-xl text-center max-w-3xl mx-auto text-gray-600 dark:text-gray-300"
+      >
+        Comprehensive, compassionate support designed to help couples navigate challenges and rebuild stronger connections.
+      </motion.p>
+    </motion.div>
+  </motion.div>
+</motion.div>
 
       {/* Animated Service Types Section */}
       <motion.div 
@@ -152,50 +165,51 @@ const ServicesPage = () => {
             Service Offerings
           </motion.h2>
           <motion.div 
-            variants={staggerChildren}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"
-          >
-            {serviceTypes.map((service, index) => (
+  variants={staggerChildren}
+  className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"
+>
+  {serviceTypes.map((service, index) => (
+    <motion.div
+      key={index}
+      variants={fadeInUpVariants}
+      whileHover={{ 
+        scale: 1.05,
+        boxShadow: "0 20px 30px rgba(0,0,0,0.1)"
+      }}
+      transition={{ type: "spring", stiffness: 300 }}
+      className="h-full" // Added to ensure full height
+    >
+      <Card className="p-6 md:p-8 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 h-full flex flex-col">
+        <div className="mb-4">
+          {service.icon}
+        </div>
+        <h3 className="text-lg md:text-xl font-semibold mb-3 md:mb-4 bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent">
+          {service.title}
+        </h3>
+        <p className="text-sm md:text-base mb-4 text-gray-600 dark:text-gray-300 flex-grow">
+          {service.description}
+        </p>
+        <motion.div variants={staggerChildren}>
+          {service.features.map((feature, featureIndex) => (
+            <motion.div 
+              key={featureIndex}
+              variants={fadeInUpVariants}
+              className="flex items-center gap-2 mb-2 text-gray-700 dark:text-gray-400"
+            >
               <motion.div
-                key={index}
-                variants={fadeInUpVariants}
-                whileHover={{ 
-                  scale: 1.05,
-                  boxShadow: "0 20px 30px rgba(0,0,0,0.1)"
-                }}
-                transition={{ type: "spring", stiffness: 300 }}
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.9 }}
               >
-                <Card className="p-6 md:p-8 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
-                  <div className="mb-4">
-                    {service.icon}
-                  </div>
-                  <h3 className="text-lg md:text-xl font-semibold mb-3 md:mb-4 bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent">
-                    {service.title}
-                  </h3>
-                  <p className="text-sm md:text-base mb-4 text-gray-600 dark:text-gray-300">
-                    {service.description}
-                  </p>
-                  <motion.div variants={staggerChildren}>
-                    {service.features.map((feature, featureIndex) => (
-                      <motion.div 
-                        key={featureIndex}
-                        variants={fadeInUpVariants}
-                        className="flex items-center gap-2 mb-2 text-gray-700 dark:text-gray-400"
-                      >
-                        <motion.div
-                          whileHover={{ scale: 1.2 }}
-                          whileTap={{ scale: 0.9 }}
-                        >
-                          <Check size={16} className="text-purple-600 dark:text-orange-400" />
-                        </motion.div>
-                        <span className="text-xs md:text-sm">{feature}</span>
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                </Card>
+                <Check size={16} className="text-purple-600 dark:text-orange-400" />
               </motion.div>
-            ))}
-          </motion.div>
+              <span className="text-xs md:text-sm">{feature}</span>
+            </motion.div>
+          ))}
+        </motion.div>
+      </Card>
+    </motion.div>
+  ))}
+</motion.div>
         </div>
       </motion.div>
 

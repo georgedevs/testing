@@ -4,6 +4,8 @@ import { motion, useScroll, useTransform, useInView, AnimatePresence } from 'fra
 import { Card } from '@/components/ui/card';
 import Header from '@/components/Header';
 import Footer from '../pages/Footer';
+import { Handshake, Lock } from 'lucide-react';
+import { Target } from 'lucide-react';
 
 const AboutPage = () => {
   const containerRef = useRef(null);
@@ -44,42 +46,55 @@ const AboutPage = () => {
       <Header />
 
       {/* Animated Hero Section */}
-      <motion.div 
-        ref={heroRef}
-        style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
-        className="relative pt-16 pb-10 md:pt-24 md:pb-16"
+<motion.div 
+  ref={heroRef}
+  style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
+  className="relative pt-16 pb-10 md:pt-24 md:pb-16"
+>
+  {/* Background Image Container */}
+  <div className="absolute inset-0">
+    <motion.img
+      initial={{ scale: 1.1, opacity: 0 }}
+      animate={{ scale: 1, opacity: 0.8 }}
+      transition={{ duration: 0.8 }}
+      src="/about.webp"
+      alt="About us background"
+      className="object-cover w-full h-full dark:opacity-30"
+    />
+    <div className="absolute inset-0 bg-white/60 dark:bg-gray-900/70 shadow-inner" />
+  </div>
+
+  <motion.div 
+    initial="hidden"
+    animate={isHeroInView ? "visible" : "hidden"}
+    variants={fadeInUpVariants}
+    transition={{ duration: 0.8, ease: "easeOut" }}
+    className="relative z-10 max-w-6xl mx-auto px-4 md:px-8"
+  >
+    <motion.div
+      whileHover={{ scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 300 }}
+      className="p-8 rounded-2xl bg-white/90 dark:bg-gray-800/90 shadow-2xl"
+    >
+      <motion.h1 
+        className="text-3xl md:text-5xl font-bold text-center mb-4 md:mb-6 mt-6 md:mt-10 bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
       >
-        <motion.div 
-          initial="hidden"
-          animate={isHeroInView ? "visible" : "hidden"}
-          variants={fadeInUpVariants}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="max-w-6xl mx-auto px-4 md:px-8"
-        >
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 300 }}
-            className="p-8 rounded-2xl bg-white/90 dark:bg-gray-800/90 shadow-2xl"
-          >
-            <motion.h1 
-              className="text-3xl md:text-5xl font-bold text-center mb-4 md:mb-6 mt-6 md:mt-10 bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              About MiCounselor
-            </motion.h1>
-            <motion.p 
-              className="text-base md:text-xl text-center max-w-3xl mx-auto text-gray-600 dark:text-gray-300"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              We're dedicated to helping couples build stronger, more meaningful relationships through expert counseling and innovative approaches to therapy.
-            </motion.p>
-          </motion.div>
-        </motion.div>
-      </motion.div>
+        About MiCounselor
+      </motion.h1>
+      <motion.p 
+        className="text-base md:text-xl text-center max-w-3xl mx-auto text-gray-600 dark:text-gray-300"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.4 }}
+      >
+        We're dedicated to helping couples build stronger, more meaningful relationships through expert counseling and innovative approaches to therapy.
+      </motion.p>
+    </motion.div>
+  </motion.div>
+</motion.div>
 
       {/* Animated Mission Statement */}
       <motion.div 
@@ -111,44 +126,42 @@ const AboutPage = () => {
               variants={staggerChildren}
               className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"
             >
-              {[
-                {
-                  icon: "🎯",
-                  title: "Expert Guidance",
-                  description: "Professional counselors with extensive experience in relationship therapy"
-                },
-                {
-                  icon: "🤝",
-                  title: "Personalized Care",
-                  description: "Tailored approaches that address your unique relationship dynamics"
-                },
-                {
-                  icon: "🔒",
-                  title: "Complete Privacy",
-                  description: "Secure, confidential environment for open communication"
-                }
-              ].map((item, index) => (
-                <motion.div
-                  key={index}
-                  variants={fadeInUpVariants}
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                  className="text-center p-6 rounded-xl bg-gray-50 dark:bg-gray-800 shadow-lg"
-                >
-                  <motion.div 
-                    className="text-4xl mb-4"
-                    whileHover={{ scale: 1.2, rotate: 360 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
-                    {item.icon}
-                  </motion.div>
-                  <h3 className="text-lg md:text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">
-                    {item.description}
-                  </p>
-                </motion.div>
+            {[
+  {
+    icon: <Target className="w-10 h-10 text-purple-600 dark:text-orange-500" />,
+    title: "Expert Guidance",
+    description: "Professional counselors with extensive experience in relationship therapy"
+  },
+  {
+    icon: <Handshake className="w-10 h-10 text-purple-600 dark:text-orange-500" />,
+    title: "Personalized Care",
+    description: "Tailored approaches that address your unique relationship dynamics"
+  },
+  {
+    icon: <Lock className="w-10 h-10 text-purple-600 dark:text-orange-500" />,
+    title: "Complete Privacy",
+    description: "Secure, confidential environment for open communication"
+  }
+].map((item, index) => (
+  <motion.div
+  key={index}
+  variants={fadeInUpVariants}
+  whileHover={{ scale: 1.05 }}
+  transition={{ type: "spring", stiffness: 300 }}
+  className="text-center p-6 rounded-xl bg-gray-50 dark:bg-gray-800 shadow-lg"
+>
+  <div 
+    className="flex justify-center mb-4"
+  >
+    {item.icon}
+  </div>
+  <h3 className="text-lg md:text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">
+    {item.title}
+  </h3>
+  <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">
+    {item.description}
+  </p>
+</motion.div>
               ))}
             </motion.div>
           </motion.div>

@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import { useSelector } from 'react-redux';
 import { useLoadUserQuery } from '@/redux/feautures/api/apiSlice';
 import { useAuth } from '../hooks/useAuth';
+import { Handshake, Lock, MessageCircle, MessageSquare, Star } from 'lucide-react';
 
 const LandingPage = () => {
   const router = useRouter();
@@ -132,59 +133,56 @@ const LandingPage = () => {
         </motion.h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-          {[
-            {
-              icon: '⭐',
-              title: 'Expert Counselors',
-              description: 'Highly trained professionals dedicated to your relationship\'s success.'
-            },
-            {
-              icon: '🤝',
-              title: 'Personalized Approach',
-              description: 'Tailored strategies that address your unique relationship dynamics.'
-            },
-            {
-              icon: '🔒',
-              title: 'Confidential & Safe',
-              description: 'Completely anonymous and secure communication platform.'
-            },
-            {
-              icon: '💬',
-              title: 'Multiple Communication Options',
-              description: 'Chat, video, and voice sessions to suit your comfort level.'
-            }
-          ].map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isFeaturesSectionInView 
-                ? { opacity: 1, y: 0 } 
-                : { opacity: 0, y: 20 }
-              }
-              transition={{ 
-                duration: 0.5, 
-                delay: index * 0.1,
-                ease: "easeOut"
-              }}
-            >
-              <Card 
-                className="p-6 md:p-8 rounded-2xl shadow-lg transition-all duration-300 transform hover:-translate-y-2 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-              >
-                <motion.div 
-                  whileHover={{ scale: 1.1 }}
-                  className="text-4xl md:text-6xl mb-3 md:mb-4 opacity-70"
-                >
-                  {feature.icon}
-                </motion.div>
-                <h3 className="text-lg md:text-xl font-semibold mb-2 md:mb-3 bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent">
-                  {feature.title}
-                </h3>
-                <p className="text-sm md:text-base text-gray-700 dark:text-gray-300">
-                  {feature.description}
-                </p>
-              </Card>
-            </motion.div>
-          ))}
+        {[
+  {
+    icon: <Star className="w-8 h-8 text-purple-600 dark:text-orange-400" />,
+    title: 'Expert Counselors',
+    description: 'Highly trained professionals dedicated to your relationship\'s success.'
+  },
+  {
+    icon: <Handshake className="w-8 h-8 text-purple-600 dark:text-orange-400" />,
+    title: 'Personalized Approach',
+    description: 'Tailored strategies that address your unique relationship dynamics.'
+  },
+  {
+    icon: <Lock className="w-8 h-8 text-purple-600 dark:text-orange-400" />,
+    title: 'Confidential & Safe',
+    description: 'Completely anonymous and secure communication platform.'
+  },
+  {
+    icon: <MessageCircle className="w-8 h-8 text-purple-600 dark:text-orange-400" />,
+    title: 'Multiple Communication Options',
+    description: 'Chat, video, and voice sessions to suit your comfort level.'
+  }
+].map((feature, index) => (
+  <motion.div
+    key={index}
+    initial={{ opacity: 0, y: 20 }}
+    animate={isFeaturesSectionInView 
+      ? { opacity: 1, y: 0 } 
+      : { opacity: 0, y: 20 }
+    }
+    transition={{ 
+      duration: 0.5, 
+      delay: index * 0.1,
+      ease: "easeOut"
+    }}
+  >
+    <Card 
+      className="p-6 md:p-8 rounded-2xl shadow-lg transition-all duration-300 transform hover:-translate-y-2 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600"
+    >
+<div>
+        {feature.icon}
+        </div>
+      <h3 className="text-lg md:text-xl font-semibold mb-2 md:mb-3 bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent">
+        {feature.title}
+      </h3>
+      <p className="text-sm md:text-base text-gray-700 dark:text-gray-300">
+        {feature.description}
+      </p>
+    </Card>
+  </motion.div>
+))}
         </div>
       </div>
     </div>
