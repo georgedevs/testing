@@ -160,6 +160,7 @@ const CounselorSessionPage = () => {
   const parseMeetingDateTime = (meeting: any): Date | null => {
     try {
       if (!meeting?.meetingDate || !meeting?.meetingTime) {
+        console.error('Missing meeting date or time');
         return null;
       }
   
@@ -171,14 +172,18 @@ const CounselorSessionPage = () => {
         // If it's already an ISO string with time component
         if (meeting.meetingDate.includes('T')) {
           const dateOnly = meeting.meetingDate.split('T')[0];
-          return new Date(`${dateOnly}T${meetingTime}`);
+          const dateTimeStr = `${dateOnly}T${meetingTime}`;
+          console.log(`Parsing ISO date: ${dateTimeStr}`);
+          return new Date(dateTimeStr);
         } 
         // Otherwise assume it's a date string without time
+        console.log(`Parsing date string: ${meeting.meetingDate}`);
         meetingDate = new Date(meeting.meetingDate);
       } else if (meeting.meetingDate instanceof Date) {
+        console.log('Using Date object');
         meetingDate = meeting.meetingDate;
       } else {
-        console.error('Unrecognized meeting date format:', meeting.meetingDate);
+        console.error('Unrecognized meeting date format:', typeof meeting.meetingDate);
         return null;
       }
   
@@ -196,6 +201,7 @@ const CounselorSessionPage = () => {
   
       // Create new date with time
       const dateTimeStr = `${dateStr}T${meetingTime}`;
+      console.log(`Final parsed datetime string: ${dateTimeStr}`);
       const result = new Date(dateTimeStr);
   
       // Final validation
@@ -203,6 +209,13 @@ const CounselorSessionPage = () => {
         console.error('Invalid meeting date/time combination');
         return null;
       }
+  
+      console.log('Parsed meeting date:', {
+        result: result.toISOString(),
+        resultLocal: result.toString(),
+        originalDate: meeting.meetingDate,
+        originalTime: meetingTime
+      });
   
       return result;
     } catch (err) {
@@ -217,6 +230,7 @@ const CounselorSessionPage = () => {
       return false;
     }
   
+    // Get current time in user's local timezone
     const now = new Date();
     
     // Session can be joined 5 minutes before scheduled time
@@ -225,16 +239,22 @@ const CounselorSessionPage = () => {
     // Session ends 45 minutes after scheduled time
     const sessionEnd = new Date(meetingDateTime.getTime() + (45 * 60 * 1000));
   
-    // Log for debugging
+    // Log for debugging - include timezone info
     console.log('Session window check:', {
       now: now.toISOString(),
+      nowLocal: now.toString(),
       sessionStart: sessionStart.toISOString(),
+      sessionStartLocal: sessionStart.toString(),
       sessionEnd: sessionEnd.toISOString(),
+      sessionEndLocal: sessionEnd.toString(),
+      browserTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timezoneOffset: now.getTimezoneOffset() / 60, // Convert to hours
       canJoin: now >= sessionStart && now <= sessionEnd
     });
   
     return now >= sessionStart && now <= sessionEnd;
   };
+  
   
   const getSessionStatus = (meetingDateTime: Date | null, meetingStatus: string): string => {
     if (!meetingDateTime) {
