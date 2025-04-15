@@ -1,57 +1,98 @@
 import { useEffect } from 'react';
-import { addMinutes, isAfter } from 'date-fns';
-import { useRouter } from 'next/navigation';
+import { isAfter, parseISO, addMinutes } from 'date-fns';
 
-export const useAutoAbandon = (meeting: any) => {
-  const router = useRouter();
-
+// This hook automatically marks a session as abandoned if it hasn't been joined
+// within 15 minutes of the scheduled start time
+export const useAutoAbandon = (booking: any) => {
   useEffect(() => {
-    if (!meeting?.meetingDate || !meeting?.meetingTime || meeting?.status !== 'confirmed') return;
+    if (
+      !booking || 
+      !booking.meetingDate || 
+      !booking.meetingTime || 
+      booking.status !== 'confirmed'
+    ) {
+      return;
+    }
 
-    const checkAndHandleAbandonment = async () => {
-      try {
-        // Create meeting datetime
-        const meetingDateTime = new Date(`${meeting.meetingDate.toISOString().split('T')[0]}T${meeting.meetingTime}`);
-        const abandonmentTime = addMinutes(meetingDateTime, 15); // 15 minutes after scheduled start
-        
-        // If current time is after abandonment time and status is still 'confirmed'
-        if (isAfter(new Date(), abandonmentTime)) {
-          // Report no-show
-          await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/report-no-show`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-              meetingId: meeting._id,
-              noShowReason: 'Neither party joined within 15 minutes of scheduled start time'
-            })
-          });
-
-          // Redirect based on user type
-          const redirectPath = window.location.pathname.includes('/counselor') 
-            ? '/counselor/history'
-            : '/dashboard/history';
-          
-          await router.push(redirectPath);
-          
-          // Reload to refresh data
-          setTimeout(() => {
-            window.location.reload();
-          }, 100);
+    try {
+      // Safely parse the meeting date
+      let meetingDateTime: Date;
+      
+      if (typeof booking.meetingDate === 'string') {
+        // Handle string date formats
+        try {
+          if (booking.meetingDate.includes('T')) {
+            // ISO string format
+            meetingDateTime = parseISO(booking.meetingDate);
+          } else {
+            // Date string without time
+            const dateStr = new Date(booking.meetingDate).toISOString().split('T')[0];
+            meetingDateTime = new Date(`${dateStr}T${booking.meetingTime}`);
+          }
+        } catch (err) {
+          console.error('Error parsing meeting date string:', err);
+          return;
         }
-      } catch (error) {
-        console.error('Error handling session abandonment:', error);
+      } else if (booking.meetingDate instanceof Date) {
+        // Handle Date object
+        const dateStr = booking.meetingDate.toISOString().split('T')[0];
+        meetingDateTime = new Date(`${dateStr}T${booking.meetingTime}`);
+      } else {
+        // Invalid date format
+        console.error('Invalid meeting date format');
+        return;
       }
-    };
 
-    // Initial check
-    checkAndHandleAbandonment();
+      // Check if meetingDateTime is valid
+      if (isNaN(meetingDateTime.getTime())) {
+        console.error('Invalid meeting date/time');
+        return;
+      }
 
-    // Set up interval to check every minute
-    const intervalId = setInterval(checkAndHandleAbandonment, 60000);
+      // Calculate abandon time (15 minutes after scheduled start)
+      const abandonTime = addMinutes(meetingDateTime, 15);
+      
+      // Check if current time is after abandon time
+      const shouldAbandon = isAfter(new Date(), abandonTime);
 
-    return () => clearInterval(intervalId);
-  }, [meeting?.meetingDate, meeting?.meetingTime, meeting?.status, meeting?._id, router]);
+      if (shouldAbandon) {
+        // Auto-abandon logic here
+        console.log('Session should be marked as abandoned');
+        
+        // Get the authorization token
+        const accessToken = localStorage.getItem('access_token');
+        if (!accessToken) {
+          console.error('No access token found');
+          return;
+        }
+
+        // Report no-show
+        fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/report-no-show`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          },
+          body: JSON.stringify({
+            meetingId: booking._id,
+            noShowReason: 'Auto-abandoned: No one joined within 15 minutes of scheduled time'
+          })
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to mark session as abandoned');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Session marked as abandoned:', data);
+        })
+        .catch(error => {
+          console.error('Error handling session abandonment:', error);
+        });
+      }
+    } catch (error) {
+      console.error('Error handling session abandonment:', error);
+    }
+  }, [booking]);
 };
