@@ -52,12 +52,29 @@ export const useAutoAbandon = (booking: any) => {
       // Calculate abandon time (15 minutes after scheduled start)
       const abandonTime = addMinutes(meetingDateTime, 15);
       
-      // Check if current time is after abandon time
-      const shouldAbandon = isAfter(new Date(), abandonTime);
+      // Get current time
+      const now = new Date();
+
+      // Session end time (45 minutes after start)
+      const sessionEndTime = addMinutes(meetingDateTime, 45);
+
+      // Check if we're past the abandon time but before the session end time
+      // AND if the session is still in 'confirmed' status (meaning it hasn't been joined)
+      const shouldAbandon = isAfter(now, abandonTime) && 
+                           !isAfter(now, sessionEndTime) &&
+                           booking.status === 'confirmed';
+
+      // Debug logging
+      console.log('Auto abandon check:', {
+        now: now.toISOString(),
+        meetingTime: meetingDateTime.toISOString(),
+        abandonTime: abandonTime.toISOString(),
+        sessionEndTime: sessionEndTime.toISOString(),
+        shouldAbandon
+      });
 
       if (shouldAbandon) {
-        // Auto-abandon logic here
-        console.log('Session should be marked as abandoned');
+        console.log('Session should be marked as abandoned - no one joined within 15 minutes');
         
         // Get the authorization token
         const accessToken = localStorage.getItem('access_token');
