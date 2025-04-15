@@ -33,6 +33,7 @@ const SessionPage = () => {
   const [isDailyLoaded, setIsDailyLoaded] = useState(false);
   const [callFrame, setCallFrame] = useState<DailyCallFrame | null>(null);
   const [timeUntilSession, setTimeUntilSession] = useState<string | null>(null);
+  const [hasJoinedSuccessfully, setHasJoinedSuccessfully] = useState(false);
 
   // Socket event handling for real-time updates
   useEffect(() => {
@@ -84,19 +85,36 @@ const SessionPage = () => {
     return () => clearInterval(timer);
   }, [activeBooking]);
 
-  // Call frame event listeners
+  // Call frame event listeners with improved error handling
   useEffect(() => {
     let meetingEndedTimeout: NodeJS.Timeout;
 
     if (callFrame) {
+      console.log('Setting up Daily.co event listeners');
       callFrame
-        .on('left-meeting', handleEndCall)
+        .on('joined-meeting', () => {
+          console.log('Successfully joined meeting');
+          setHasJoinedSuccessfully(true);
+        })
+        .on('left-meeting', (event) => {
+          console.log('Left meeting event:', event);
+          // Only handle the left-meeting event if we successfully joined first
+          if (hasJoinedSuccessfully) {
+            console.log('Processing left-meeting event - session was joined');
+            handleEndCall();
+          } else {
+            console.log('Ignoring left-meeting event - session was never joined');
+          }
+        })
         .on('error', (e) => {
           console.error('Daily.co error:', e);
-          setError('Failed to connect to meeting room. Please try refreshing.');
+          setError(`Connection error: ${e.message || 'Failed to connect to meeting room'}. Please try refreshing.`);
         })
         .on('meeting-ended', () => {
-          meetingEndedTimeout = setTimeout(handleEndCall, 2000);
+          console.log('Meeting ended event received');
+          if (hasJoinedSuccessfully) {
+            meetingEndedTimeout = setTimeout(() => handleEndCall(), 2000);
+          }
         });
     }
 
@@ -106,17 +124,24 @@ const SessionPage = () => {
       }
       if (callFrame) {
         try {
-          callFrame.leave();
+          console.log('Cleaning up Daily.co frame - hasJoinedSuccessfully:', hasJoinedSuccessfully);
+          // Only try to leave if we successfully joined
+          if (hasJoinedSuccessfully) {
+            callFrame.leave();
+          } else {
+            // Just destroy the frame without triggering leave events
+            callFrame.destroy();
+          }
         } catch (err) {
-          console.error('Error leaving call:', err);
+          console.error('Error during Daily.co cleanup:', err);
         }
       }
     };
-  }, [callFrame]);
+  }, [callFrame, hasJoinedSuccessfully]);
 
   // Timer for session end warning and auto-ending call
   useEffect(() => {
-    if (!callFrame || !activeBooking?.booking?.meetingDate || !activeBooking?.booking?.meetingTime) return;
+    if (!callFrame || !activeBooking?.booking?.meetingDate || !activeBooking?.booking?.meetingTime || !hasJoinedSuccessfully) return;
 
     const meetingDateTime = parseMeetingDateTime(activeBooking.booking);
     if (!meetingDateTime) return;
@@ -148,16 +173,16 @@ const SessionPage = () => {
       clearTimeout(warningTimer);
       clearTimeout(endCallTimer);
     };
-  }, [callFrame, activeBooking?.booking]);
+  }, [callFrame, activeBooking?.booking, hasJoinedSuccessfully]);
 
   const handleDailyLoad = () => {
+    console.log('Daily.co SDK loaded successfully');
     setIsDailyLoaded(true);
   };
 
   const parseMeetingDateTime = (meeting: any): Date | null => {
     try {
       if (!meeting?.meetingDate || !meeting?.meetingTime) {
-        console.error('Missing meeting date or time');
         return null;
       }
   
@@ -169,18 +194,14 @@ const SessionPage = () => {
         // If it's already an ISO string with time component
         if (meeting.meetingDate.includes('T')) {
           const dateOnly = meeting.meetingDate.split('T')[0];
-          const dateTimeStr = `${dateOnly}T${meetingTime}`;
-          console.log(`Parsing ISO date: ${dateTimeStr}`);
-          return new Date(dateTimeStr);
+          return new Date(`${dateOnly}T${meetingTime}`);
         } 
         // Otherwise assume it's a date string without time
-        console.log(`Parsing date string: ${meeting.meetingDate}`);
         meetingDate = new Date(meeting.meetingDate);
       } else if (meeting.meetingDate instanceof Date) {
-        console.log('Using Date object');
         meetingDate = meeting.meetingDate;
       } else {
-        console.error('Unrecognized meeting date format:', typeof meeting.meetingDate);
+        console.error('Unrecognized meeting date format:', meeting.meetingDate);
         return null;
       }
   
@@ -198,7 +219,6 @@ const SessionPage = () => {
   
       // Create new date with time
       const dateTimeStr = `${dateStr}T${meetingTime}`;
-      console.log(`Final parsed datetime string: ${dateTimeStr}`);
       const result = new Date(dateTimeStr);
   
       // Final validation
@@ -206,13 +226,6 @@ const SessionPage = () => {
         console.error('Invalid meeting date/time combination');
         return null;
       }
-  
-      console.log('Parsed meeting date:', {
-        result: result.toISOString(),
-        resultLocal: result.toString(),
-        originalDate: meeting.meetingDate,
-        originalTime: meetingTime
-      });
   
       return result;
     } catch (err) {
@@ -227,7 +240,6 @@ const SessionPage = () => {
       return false;
     }
   
-    // Get current time in user's local timezone
     const now = new Date();
     
     // Session can be joined 5 minutes before scheduled time
@@ -236,7 +248,7 @@ const SessionPage = () => {
     // Session ends 45 minutes after scheduled time
     const sessionEnd = new Date(meetingDateTime.getTime() + (45 * 60 * 1000));
   
-    // Log for debugging - include timezone info
+    // Log for debugging
     console.log('Session window check:', {
       now: now.toISOString(),
       nowLocal: now.toString(),
@@ -290,6 +302,7 @@ const SessionPage = () => {
 
     setIsJoining(true);
     setError('');
+    setHasJoinedSuccessfully(false); // Reset join status
 
     try {
       // Get access token from localStorage
@@ -315,8 +328,9 @@ const SessionPage = () => {
       }
       
       const data = await response.json();
-      console.log('Meeting token received', { token: 'redacted', roomUrl: data.roomUrl });
+      console.log('Meeting token received', { roomUrl: data.roomUrl });
 
+      console.log('Creating Daily.co frame...');
       const frame = await window.DailyIframe.createFrame({
         iframeStyle: {
           position: 'fixed',
@@ -331,24 +345,36 @@ const SessionPage = () => {
         showFullscreenButton: true,
       });
 
-      console.log('Daily.co frame created');
+      console.log('Daily.co frame created, joining meeting...');
       setCallFrame(frame);
 
       await frame.join({ 
         url: data.roomUrl, 
         token: data.token
       });
-      console.log('Joined meeting successfully');
+      console.log('Join command sent to Daily.co');
+      // Note: The actual "joined" status is handled via the event listener
 
     } catch (err) {
       console.error('Meeting access error:', err);
       setError(err instanceof Error ? err.message : 'Failed to join meeting. Please try again.');
+      
+      // Clean up any partial frame that might have been created
+      if (callFrame) {
+        try {
+          await callFrame.destroy();
+          setCallFrame(null);
+        } catch (cleanupErr) {
+          console.error('Error cleaning up frame after join failure:', cleanupErr);
+        }
+      }
     } finally {
       setIsJoining(false);
     }
   };
 
   const handleEndCall = async () => {
+    console.log('Handling end call, hasJoinedSuccessfully:', hasJoinedSuccessfully);
     try {
       if (callFrame) {
         console.log('Leaving call...');
@@ -356,7 +382,8 @@ const SessionPage = () => {
         setCallFrame(null);
       }
       
-      if (activeBooking?.booking?._id) {
+      // Only mark session as completed if it was successfully joined
+      if (hasJoinedSuccessfully && activeBooking?.booking?._id) {
         console.log('Completing session...');
         const accessToken = localStorage.getItem('access_token');
         
@@ -386,14 +413,18 @@ const SessionPage = () => {
           console.error('Error completing session:', errorData);
         } else {
           console.log('Session completed successfully');
+          
+          // Navigate to history page after successful completion
+          await router.push('/dashboard/history');
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
         }
+      } else if (!hasJoinedSuccessfully) {
+        console.log('Session was never successfully joined, not marking as completed');
+        // Just clear the UI and error state
+        setError('');
       }
-      
-      await router.push('/dashboard/history');
-
-      setTimeout(() => {
-        window.location.reload();
-      }, 100);
     } catch (err) {
       console.error('Error ending call:', err);
       setError('Failed to end call properly. Please try again.');

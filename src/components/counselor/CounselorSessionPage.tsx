@@ -34,6 +34,7 @@ const CounselorSessionPage = () => {
   const [isDailyLoaded, setIsDailyLoaded] = useState(false);
   const [callFrame, setCallFrame] = useState<DailyCallFrame | null>(null);
   const [timeUntilSession, setTimeUntilSession] = useState<string | null>(null);
+  const [hasJoinedSuccessfully, setHasJoinedSuccessfully] = useState(false);
 
   useAutoAbandon(activeSession?.booking);
 
@@ -87,19 +88,36 @@ const CounselorSessionPage = () => {
     return () => clearInterval(timer);
   }, [activeSession]);
 
-  // Call frame event listeners
+  // Call frame event listeners with improved error handling
   useEffect(() => {
     let meetingEndedTimeout: NodeJS.Timeout;
 
     if (callFrame) {
+      console.log('Setting up Daily.co event listeners');
       callFrame
-        .on('left-meeting', handleEndCall)
+        .on('joined-meeting', () => {
+          console.log('Successfully joined meeting');
+          setHasJoinedSuccessfully(true);
+        })
+        .on('left-meeting', (event) => {
+          console.log('Left meeting event:', event);
+          // Only handle the left-meeting event if we successfully joined first
+          if (hasJoinedSuccessfully) {
+            console.log('Processing left-meeting event - session was joined');
+            handleEndCall();
+          } else {
+            console.log('Ignoring left-meeting event - session was never joined');
+          }
+        })
         .on('error', (e) => {
           console.error('Daily.co error:', e);
-          setError('Failed to connect to meeting room. Please try refreshing.');
+          setError(`Connection error: ${e.message || 'Failed to connect to meeting room'}. Please try refreshing.`);
         })
         .on('meeting-ended', () => {
-          meetingEndedTimeout = setTimeout(handleEndCall, 2000);
+          console.log('Meeting ended event received');
+          if (hasJoinedSuccessfully) {
+            meetingEndedTimeout = setTimeout(() => handleEndCall(), 2000);
+          }
         });
     }
 
@@ -109,17 +127,24 @@ const CounselorSessionPage = () => {
       }
       if (callFrame) {
         try {
-          callFrame.leave();
+          console.log('Cleaning up Daily.co frame - hasJoinedSuccessfully:', hasJoinedSuccessfully);
+          // Only try to leave if we successfully joined
+          if (hasJoinedSuccessfully) {
+            callFrame.leave();
+          } else {
+            // Just destroy the frame without triggering leave events
+            callFrame.destroy();
+          }
         } catch (err) {
-          console.error('Error leaving call:', err);
+          console.error('Error during Daily.co cleanup:', err);
         }
       }
     };
-  }, [callFrame]);
+  }, [callFrame, hasJoinedSuccessfully]);
 
   // Timer for session end warning and auto-ending call
   useEffect(() => {
-    if (!callFrame || !activeSession?.booking?.meetingDate || !activeSession?.booking?.meetingTime) return;
+    if (!callFrame || !activeSession?.booking?.meetingDate || !activeSession?.booking?.meetingTime || !hasJoinedSuccessfully) return;
 
     const meetingDateTime = parseMeetingDateTime(activeSession.booking);
     if (!meetingDateTime) return;
@@ -151,9 +176,10 @@ const CounselorSessionPage = () => {
       clearTimeout(warningTimer);
       clearTimeout(endCallTimer);
     };
-  }, [callFrame, activeSession?.booking]);
+  }, [callFrame, activeSession?.booking, hasJoinedSuccessfully]);
 
   const handleDailyLoad = () => {
+    console.log('Daily.co SDK loaded successfully');
     setIsDailyLoaded(true);
   };
 
@@ -255,7 +281,6 @@ const CounselorSessionPage = () => {
     return now >= sessionStart && now <= sessionEnd;
   };
   
-  
   const getSessionStatus = (meetingDateTime: Date | null, meetingStatus: string): string => {
     if (!meetingDateTime) {
       return 'Error loading session time';
@@ -294,6 +319,7 @@ const CounselorSessionPage = () => {
 
     setIsJoining(true);
     setError('');
+    setHasJoinedSuccessfully(false); // Reset join status
 
     try {
       // Get access token from localStorage
@@ -321,6 +347,7 @@ const CounselorSessionPage = () => {
       const data = await response.json();
       console.log('Meeting token received', { token: 'redacted', roomUrl: data.roomUrl });
 
+      console.log('Creating Daily.co frame...');
       const frame = await window.DailyIframe.createFrame({
         iframeStyle: {
           position: 'fixed',
@@ -335,24 +362,36 @@ const CounselorSessionPage = () => {
         showFullscreenButton: true,
       });
 
-      console.log('Daily.co frame created');
+      console.log('Daily.co frame created, joining meeting...');
       setCallFrame(frame);
 
       await frame.join({ 
         url: data.roomUrl, 
         token: data.token
       });
-      console.log('Joined meeting successfully');
+      console.log('Join command sent to Daily.co');
+      // Note: The actual "joined" status is handled via the event listener
 
     } catch (err) {
       console.error('Meeting access error:', err);
       setError(err instanceof Error ? err.message : 'Failed to join meeting. Please try again.');
+      
+      // Clean up any partial frame that might have been created
+      if (callFrame) {
+        try {
+          await callFrame.destroy();
+          setCallFrame(null);
+        } catch (cleanupErr) {
+          console.error('Error cleaning up frame after join failure:', cleanupErr);
+        }
+      }
     } finally {
       setIsJoining(false);
     }
   };
 
   const handleEndCall = async () => {
+    console.log('Handling end call, hasJoinedSuccessfully:', hasJoinedSuccessfully);
     try {
       if (callFrame) {
         console.log('Leaving call...');
@@ -360,7 +399,8 @@ const CounselorSessionPage = () => {
         setCallFrame(null);
       }
       
-      if (activeSession?.booking?._id) {
+      // Only mark session as completed if it was successfully joined
+      if (hasJoinedSuccessfully && activeSession?.booking?._id) {
         console.log('Completing session...');
         const accessToken = localStorage.getItem('access_token');
         
@@ -390,14 +430,18 @@ const CounselorSessionPage = () => {
           console.error('Error completing session:', errorData);
         } else {
           console.log('Session completed successfully');
+          
+          // Navigate to history page after successful completion
+          await router.push('/counselor/history');
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
         }
+      } else if (!hasJoinedSuccessfully) {
+        console.log('Session was never successfully joined, not marking as completed');
+        // Just clear the UI and error state
+        setError('');
       }
-      
-      await router.push('/counselor/history');
-
-      setTimeout(() => {
-        window.location.reload();
-      }, 100);
     } catch (err) {
       console.error('Error ending call:', err);
       setError('Failed to end call properly. Please try again.');
