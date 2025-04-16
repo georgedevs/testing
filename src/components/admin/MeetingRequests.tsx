@@ -50,7 +50,11 @@ interface ApiError {
 
 export default function MeetingRequests() {
   const socket = useSocket();
-  const { data, isLoading, error,refetch } = useGetMeetingRequestsQuery()
+  const { data, isLoading, error, refetch } = useGetMeetingRequestsQuery(undefined, {
+    refetchOnMountOrArgChange: true, 
+    refetchOnFocus: true,            
+    refetchOnReconnect: true          
+  });
   const { data: counselorsData } = useGetAllCounselorsQuery()
   const [assignCounselor] = useAssignCounselorMutation();
   
