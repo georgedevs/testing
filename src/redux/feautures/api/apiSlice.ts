@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery, BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
-import { userLoggedIn, userLoggedOut } from "../auth/authSlice";
+import { userLoggedIn, userLoggedOut, setLoading } from "../auth/authSlice";
 import { Mutex } from 'async-mutex';
 import { IUser } from "@/redux/types/auth";
 import { tokenService } from "@/utils/tokenService";
@@ -87,6 +87,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 
     return result;
 };
+
 export const apiSlice = createApi({
     reducerPath: "api",
     baseQuery: baseQueryWithReauth,
@@ -112,6 +113,9 @@ export const apiSlice = createApi({
             }),
             providesTags: ['User'],
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+                // Set loading state to true when starting the request
+                dispatch(setLoading(true));
+                
                 try {
                     const { data } = await queryFulfilled;
                     
@@ -137,9 +141,12 @@ export const apiSlice = createApi({
                     }
                 } catch (error) {
                     console.error("Load user failed:", error);
+                    // Set loading to false in case of error
+                    dispatch(setLoading(false));
                 }
             },
         }),
     }),
 });
+
 export const { useLoadUserQuery } = apiSlice;

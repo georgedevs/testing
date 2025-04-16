@@ -8,12 +8,16 @@ const initialState: AuthState = {
     activationToken: "",
     user: null,
     isAuthenticated: tokenService.isAuthenticated(),
+    isLoading: false,
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+      setLoading: (state, action: PayloadAction<boolean>) => {
+          state.isLoading = action.payload;
+      },
       userRegistration: (state, action: PayloadAction<{ token: string }>) => {
           state.activationToken = action.payload.token;
       },
@@ -21,6 +25,7 @@ const authSlice = createSlice({
           state.token = action.payload.accessToken;
           state.user = action.payload.user;
           state.isAuthenticated = true;
+          state.isLoading = false;
           // Store both tokens
           tokenService.setTokens(action.payload.accessToken, action.payload.refreshToken);
       },
@@ -30,16 +35,28 @@ const authSlice = createSlice({
           state.isAuthenticated = false;
           tokenService.clearTokens();
       },
-        updateUserAvatar: (state, action: PayloadAction<{ avatarId: string; imageUrl: string }>) => {
-            if (state.user) {
-                state.user.avatar = {
-                    avatarId: action.payload.avatarId,
-                    imageUrl: action.payload.imageUrl
-                };
-            }
-        }
-    },
+      updateUserAvatar: (state, action: PayloadAction<{ avatarId: string; imageUrl: string }>) => {
+          if (state.user) {
+              state.user.avatar = {
+                  avatarId: action.payload.avatarId,
+                  imageUrl: action.payload.imageUrl
+              };
+          }
+      },
+      updateUserTourStatus: (state, action: PayloadAction<boolean>) => {
+          if (state.user) {
+              state.user.tourViewed = action.payload;
+          }
+      }
+  },
 });
 
-export const { userRegistration, userLoggedIn, userLoggedOut, updateUserAvatar } = authSlice.actions;
+export const { 
+    setLoading,
+    userRegistration, 
+    userLoggedIn, 
+    userLoggedOut, 
+    updateUserAvatar,
+    updateUserTourStatus
+} = authSlice.actions;
 export default authSlice.reducer;

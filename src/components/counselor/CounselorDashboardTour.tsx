@@ -24,20 +24,32 @@ interface TourStep {
 interface CounselorDashboardTourProps {
   children: React.ReactNode;
   isAvatarModalOpen: boolean;
+  isLoadingUser?: boolean;
 }
 
 const CounselorDashboardTour: React.FC<CounselorDashboardTourProps> = ({ 
   children, 
-  isAvatarModalOpen 
+  isAvatarModalOpen,
+  isLoadingUser = false
 }) => {
   // State management
   const [runTour, setRunTour] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isTourReady, setIsTourReady] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   
   // Redux hooks
   const user = useSelector((state: RootState) => state.auth.user);
   const [updateTourStatus] = useUpdateTourStatusMutation();
+
+  // Only set tour ready when we have definitive user data
+  useEffect(() => {
+    if (!isLoadingUser && user) {
+      setIsTourReady(true);
+      if (!user.tourViewed && !isAvatarModalOpen && user.avatar) {
+        setRunTour(true);
+      }
+    }
+  }, [isLoadingUser, user, isAvatarModalOpen]);
 
   // Tour steps configuration
   const steps: TourStep[] = [
@@ -96,24 +108,13 @@ const CounselorDashboardTour: React.FC<CounselorDashboardTourProps> = ({
     }
   };
 
-  // Effects
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (mounted && !user?.tourViewed && !isAvatarModalOpen && user?.avatar) {
-      setRunTour(true);
-    }
-  }, [isAvatarModalOpen, user, mounted]);
-
   // Handlers
   const handleTourCallback = async (data: any) => {
     const { status, type } = data;
   
     // Check if tour is finished or skipped
     if ((type === 'tour:end' && status === 'finished') || status === 'skipped') {
-      setIsLoading(true);
+      setIsUpdating(true);
       try {
         const result = await updateTourStatus().unwrap();
         if (result.success) {
@@ -122,22 +123,20 @@ const CounselorDashboardTour: React.FC<CounselorDashboardTourProps> = ({
       } catch (error) {
         console.error('Failed to update tour status:', error);
       } finally {
-        setIsLoading(false);
+        setIsUpdating(false);
       }
     }
   };
 
-  if (!mounted) return <>{children}</>;
-
   return (
     <>
-      {isLoading && (
+      {isUpdating && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
           <Loader2 className="animate-spin text-white w-8 h-8" />
         </div>
       )}
       
-      {mounted && !user?.tourViewed && (
+      {isTourReady && !user?.tourViewed && (
         <Joyride
           steps={steps}
           run={runTour}

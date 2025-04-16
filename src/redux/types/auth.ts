@@ -17,7 +17,7 @@ export interface IUser {
   marriageYears?: number;
   age?: number;
   currentCounselor?: ICounselor;
-  tourViewed?:boolean;
+  tourViewed?: boolean;
 }
 
 export interface ICounselorProfile {
@@ -52,4 +52,5 @@ export interface AuthState {
   activationToken: string;
   user: IUser | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
 }

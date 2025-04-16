@@ -4,7 +4,7 @@ import Heading from '@/components/Heading'
 import { DashboardHeader } from '@/components/counselor/DashboardHeader'
 import { CounselorSidebar } from '@/components/counselor/CounselorSidebar'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import { Loader } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/redux/store'
@@ -15,17 +15,20 @@ import DashboardContent from '@/components/counselor/DashboardContent'
 import CounselorDashboardTour from '@/components/counselor/CounselorDashboardTour'
 
 const CounselorDashboardPage = () => {
-  const { isAuthenticated, userRole, isLoading } = useAuth();
+  const { isAuthenticated, userRole } = useAuth();
   const user = useSelector((state: RootState) => state.auth.user);
-  const { data: userData, refetch: refetchUser } = useLoadUserQuery((undefined), {
+  const { data: userData, refetch: refetchUser, isLoading: userDataLoading } = useLoadUserQuery((undefined), {
     skip: !isAuthenticated,
   });
+  
+  const isLoadingUser = userDataLoading;
   
   const { 
     showAvatarModal, 
     setShowAvatarModal, 
     requiresAvatar, 
-    handleAvatarUpdated 
+    handleAvatarUpdated,
+    isReady
   } = useAvatarCheck();
 
   const handleModalClose = () => {
@@ -34,12 +37,19 @@ const CounselorDashboardPage = () => {
     }
   };
   
-  if (isLoading) return <Loader className="animate-spin" />;
+  if (isLoadingUser) return (
+    <div className="flex items-center justify-center h-screen w-full">
+      <Loader2 className="animate-spin w-8 h-8 text-blue-500" />
+    </div>
+  );
 
   return (
     <>
       <ProtectedRoute allowedRoles={['counselor']}>
-        <CounselorDashboardTour isAvatarModalOpen={showAvatarModal}>
+        <CounselorDashboardTour 
+          isAvatarModalOpen={showAvatarModal} 
+          isLoadingUser={isLoadingUser || !isReady}
+        >
           <Heading 
             title="Counselor Dashboard"
             description="MiCounselor Counselor Dashboard"

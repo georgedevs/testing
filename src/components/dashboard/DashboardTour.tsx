@@ -14,13 +14,13 @@ const Joyride = dynamic(
 interface DashboardTourProps {
   children: React.ReactNode;
   isAvatarModalOpen: boolean;
-  isLoadingUser?: boolean; // Add loading prop
+  isLoadingUser: boolean;
 }
 
 const DashboardTour: React.FC<DashboardTourProps> = ({ 
   children, 
   isAvatarModalOpen,
-  isLoadingUser = false 
+  isLoadingUser = false
 }) => {
   const [runTour, setRunTour] = useState(false);
   const [isTourReady, setIsTourReady] = useState(false);
@@ -39,7 +39,7 @@ const DashboardTour: React.FC<DashboardTourProps> = ({
     }
   }, [isLoadingUser, user, isAvatarModalOpen]);
 
-  const steps =[
+  const steps = [
     {
       target: '[data-tutorial="notifications"]',
       content: 'Get notified about your upcoming sessions and important updates',
