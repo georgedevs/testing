@@ -29,21 +29,32 @@ const BookingForm: React.FC<BookingFormProps> = ({ onBookingSuccess }) => {
   const { data: userData, isLoading: isUserLoading } = useLoadUserQuery();
   const [initiateBooking, { isLoading }] = useInitiateBookingMutation();
 
+  // Log when user data changes
   useEffect(() => {
-    console.log('User Data:', userData);
-    console.log('Current Counselor:', userData?.user?.currentCounselor);
-    console.log('User Role:', userData?.user?.role);
-  }, [userData]);
+    console.log('User Data Updated:', {
+      userData,
+      currentCounselor: userData?.user?.currentCounselor,
+      isUserLoading,
+      usePreviousCounselor
+    });
+  }, [userData, isUserLoading, usePreviousCounselor]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
+    // Enhanced debug logging
+    const hasCurrentCounselor = !!userData?.user?.currentCounselor;
+    const shouldUseCurrentCounselor = hasCurrentCounselor && usePreviousCounselor;
+    
     console.log('Submit Data:', {
       meetingType,
       issueDescription,
       usePreviousCounselor,
-      hasCurrentCounselor: !!userData?.user?.currentCounselor
+      hasCurrentCounselor,
+      shouldUseCurrentCounselor,
+      currentCounselorId: userData?.user?.currentCounselor?._id || "Not set",
+      currentCounselorData: userData?.user?.currentCounselor
     });
     
     if (!issueDescription.trim()) {
@@ -52,11 +63,13 @@ const BookingForm: React.FC<BookingFormProps> = ({ onBookingSuccess }) => {
     }
 
     try {
-      await initiateBooking({
+      const response = await initiateBooking({
         meetingType,
         issueDescription: issueDescription.trim(),
-        usePreviousCounselor: userData?.user?.currentCounselor && usePreviousCounselor
+        usePreviousCounselor: shouldUseCurrentCounselor
       }).unwrap();
+
+      console.log('Booking Response:', response);
 
       setMeetingType('virtual');
       setIssueDescription('');
@@ -69,6 +82,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ onBookingSuccess }) => {
       onBookingSuccess?.();
       
     } catch (err: any) {
+      console.error('Booking Error:', err);
       setError(err.data?.message || 'Something went wrong');
     }
   };
@@ -102,7 +116,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ onBookingSuccess }) => {
                 htmlFor="usePreviousCounselor"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                Book with your previous counselor
+                Book with your previous counselor ({userData.user.currentCounselor.fullName || 'Unknown'})
               </label>
             </div>
           )}

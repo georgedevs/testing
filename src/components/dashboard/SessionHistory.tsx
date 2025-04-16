@@ -29,7 +29,7 @@ const SessionHistory = () => {
         return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
       default:
         return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
-    }
+    } 
   };
 
   const getSessionTypeIcon = (type) => {
