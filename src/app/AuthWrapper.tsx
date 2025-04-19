@@ -2,10 +2,10 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import Loader from '@/components/Loader';
-import { useLoadUserQuery } from '@/redux/feautures/api/apiSlice';
 import { useSelector } from 'react-redux';
 import OfflineStatusHandler from '@/components/OfflineStatusHandler';
 import { useTokenSync } from './hooks/useTokenSync';
+import { useAuthCheck } from '@/utils/useAuthCheck';
 
 const publicRoutes = [
     '/',
@@ -26,26 +26,26 @@ export default function AuthWrapper({
 }: {
     children: React.ReactNode;
 }) {
-    useTokenSync()
-    const { isLoading, isError } = useLoadUserQuery(undefined, {
-        refetchOnMountOrArgChange: true,
-        refetchOnFocus: true,
-    });
+    useTokenSync();
+    const { isLoading, checkComplete } = useAuthCheck();
     
     const { user, isAuthenticated } = useSelector((state: any) => state.auth);
     const pathname = usePathname();
     const router = useRouter();
 
     useEffect(() => {
+        // Only run this effect after auth check is complete
+        if (!checkComplete) return;
+
         const isPublicRoute = publicRoutes.some(route => 
             pathname === route || pathname.startsWith('/resources/'));
 
-        if (!isPublicRoute && !isLoading) {
+        if (!isPublicRoute) {
             if (!isAuthenticated || !user) {
                 router.push('/signin');
             }
         }
-    }, [pathname, isLoading, isAuthenticated, user, router]);
+    }, [pathname, checkComplete, isAuthenticated, user, router]);
 
     // Wrap everything in the OfflineStatusHandler
     return (
