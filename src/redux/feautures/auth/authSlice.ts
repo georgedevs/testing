@@ -1,13 +1,12 @@
 // src/redux/features/auth/authSlice.ts
 import { AuthState, IUser } from "@/redux/types/auth";
-import { tokenService } from "@/utils/tokenService";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const initialState: AuthState = {
-    token: tokenService.getAccessToken() || "",
+    token: "", // No longer used, kept for compatibility
     activationToken: "",
     user: null,
-    isAuthenticated: tokenService.isAuthenticated(),
+    isAuthenticated: false, // We'll determine this based on user object
     isLoading: false,
 };
 
@@ -21,19 +20,16 @@ const authSlice = createSlice({
       userRegistration: (state, action: PayloadAction<{ token: string }>) => {
           state.activationToken = action.payload.token;
       },
-      userLoggedIn: (state, action: PayloadAction<{ accessToken: string; refreshToken: string; user: IUser }>) => {
-          state.token = action.payload.accessToken;
+      userLoggedIn: (state, action: PayloadAction<{ user: IUser }>) => {
+          // No longer store tokens in state since we're using cookies
           state.user = action.payload.user;
           state.isAuthenticated = true;
           state.isLoading = false;
-          // Store both tokens
-          tokenService.setTokens(action.payload.accessToken, action.payload.refreshToken);
       },
       userLoggedOut: (state) => {
           state.token = "";
           state.user = null;
           state.isAuthenticated = false;
-          tokenService.clearTokens();
       },
       updateUserAvatar: (state, action: PayloadAction<{ avatarId: string; imageUrl: string }>) => {
           if (state.user) {

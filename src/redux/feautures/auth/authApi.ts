@@ -2,7 +2,6 @@ import { IUser } from "@/redux/types/auth";
 import { apiSlice } from "../api/apiSlice";
 import { userLoggedIn, userLoggedOut, userRegistration } from "./authSlice";
 import { AvatarResponse, UpdateAvatarResponse } from "@/types/avatar";
-import { tokenService } from "@/utils/tokenService";
 
 interface LoginRequest {
   email: string;
@@ -12,17 +11,15 @@ interface LoginRequest {
 interface LoginResponse {
   success: boolean;
   user: IUser;
-  accessToken: string;
-  refreshToken:string;
 }
 
 type RegistrationData = {
-  email:string;
-  password:string;
-  fullName?:string;
-  gender?:string;
-  role?:string;
-  registrationToken?:string;
+  email: string;
+  password: string;
+  fullName?: string;
+  gender?: string;
+  role?: string;
+  registrationToken?: string;
 };
 
 type RegistrationResponse = {
@@ -61,52 +58,45 @@ export const authApi = apiSlice.injectEndpoints({
       query: (credentials) => ({
           url: "login",
           method: "POST",
-          body: credentials
+          body: credentials,
+          credentials: "include" as const, // Important for cookies
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
           try {
               const result = await queryFulfilled;
-              const { accessToken, refreshToken, user } = result.data;
-              
-              // Dispatch with both tokens
+              // We now receive just the user object, tokens are handled by cookies
               dispatch(
                   userLoggedIn({
-                      accessToken,
-                      refreshToken,
-                      user
+                      user: result.data.user
                   })
               );
           } catch (error: any) {
               console.error("Login error:", error);
-              tokenService.clearTokens();
           }
       },
-  }),
-  logout: builder.mutation<{ success: boolean; message: string }, void>({
-    query: () => ({
-        url: "logout",
-        method: "POST",
-        headers: {
-            Authorization: `Bearer ${tokenService.getAccessToken()}`
-        }
     }),
-    async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-            await queryFulfilled;
-            tokenService.clearTokens();
-            dispatch(apiSlice.util.resetApiState());
-            dispatch(userLoggedOut());
-        } catch (error) {
-            console.error("Logout error:", error);
-            tokenService.clearTokens();
-        }
-    },
-}),
+    logout: builder.mutation<{ success: boolean; message: string }, void>({
+      query: () => ({
+          url: "logout",
+          method: "POST",
+          credentials: "include" as const, // Important for cookies
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+          try {
+              await queryFulfilled;
+              dispatch(apiSlice.util.resetApiState());
+              dispatch(userLoggedOut());
+          } catch (error) {
+              console.error("Logout error:", error);
+          }
+      },
+    }),
     forgotPassword: builder.mutation({
       query: (email) => ({
         url: "forgot-password",
         method: "POST",
         body: { email },
+        credentials: "include" as const,
       }),
     }),
     generateCounselorLink: builder.mutation({
@@ -125,6 +115,7 @@ export const authApi = apiSlice.injectEndpoints({
           resetToken,
           newPassword,
         },
+        credentials: "include" as const,
       }),
     }),
     getPendingCounselors: builder.query<{ success: boolean; count: number; counselors: any[] }, void>({

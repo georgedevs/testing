@@ -1,15 +1,11 @@
-// src/redux/feautures/api/apiSlice.ts
-
+// src/redux/features/api/apiSlice.ts
 import { createApi, fetchBaseQuery, BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import { userLoggedIn, userLoggedOut, setLoading } from "../auth/authSlice";
 import { Mutex } from 'async-mutex';
 import { IUser } from "@/redux/types/auth";
-import { tokenService } from "@/utils/tokenService";
 
-interface RefreshResponse {
+interface UserResponse {
     success: boolean;
-    accessToken: string;
-    refreshToken: string;
     user: IUser;
 }
 
@@ -61,16 +57,10 @@ const customFetch: typeof fetch = async (input, init) => {
     return fetch(input, init);
 };
 
-// Modified baseQuery that uses our custom fetch
+// Modified baseQuery that uses our custom fetch and includes credentials for cookies
 const baseQuery = fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_SERVER_URL,
-    prepareHeaders: (headers) => {
-        const token = tokenService.getAccessToken();
-        if (token) {
-            headers.set('authorization', `Bearer ${token}`);
-        }
-        return headers;
-    },
+    credentials: 'include', // Important for cookies
     fetchFn: customFetch // Use our custom fetch implementation
 });
 
@@ -106,47 +96,34 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
             const release = await mutex.acquire();
 
             try {
-                const refreshToken = tokenService.getRefreshToken();
-                if (!refreshToken) {
-                    tokenService.clearTokens();
-                    api.dispatch(userLoggedOut());
-                    return result;
-                }
-
-                // Send refresh token in the request body
+                // Call the refresh endpoint, cookies will be included automatically
                 const refreshResult = await baseQuery(
                     {
                         url: 'refresh',
                         method: 'POST',
-                        body: { refreshToken }
+                        credentials: 'include' // Make sure cookies are included
                     },
                     api,
                     extraOptions
                 );
 
-                const data = refreshResult.data as RefreshResponse;
+                const data = refreshResult.data as UserResponse;
                 
                 if (data?.success) {
-                    // Store both new tokens
-                    tokenService.setTokens(data.accessToken, data.refreshToken);
-                    
-                    // Update auth state
+                    // Update auth state with new user data
                     api.dispatch(
                         userLoggedIn({
-                            accessToken: data.accessToken,
-                            refreshToken: data.refreshToken,
                             user: data.user,
                         })
                     );
 
-                    // Retry the original query with new access token
+                    // Retry the original query with new access token in cookie
                     result = await baseQuery(args, api, extraOptions);
                 } else {
                     // Silently handle expected auth failures
                     if (!isMeEndpoint) {
                         console.debug('Token refresh failed - logging out user');
                     }
-                    tokenService.clearTokens();
                     api.dispatch(userLoggedOut());
                 }
             } catch (error) {
@@ -154,7 +131,6 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
                 if (!isMeEndpoint) {
                     console.error('Token refresh failed:', error);
                 }
-                tokenService.clearTokens();
                 api.dispatch(userLoggedOut());
             } finally {
                 release();
@@ -186,10 +162,11 @@ export const apiSlice = createApi({
         'AdminFeedback',
     ],
     endpoints: (builder) => ({
-        loadUser: builder.query<RefreshResponse, void>({
+        loadUser: builder.query<UserResponse, void>({
             query: () => ({
                 url: "me",
                 method: "GET",
+                credentials: "include", // Important for cookies
             }),
             providesTags: ['User'],
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -199,25 +176,11 @@ export const apiSlice = createApi({
                 try {
                     const { data } = await queryFulfilled;
                     
-                    if (data.accessToken && data.refreshToken) {
+                    if (data.success) {
                         dispatch(userLoggedIn({ 
-                            accessToken: data.accessToken,
-                            refreshToken: data.refreshToken,
                             user: data.user,
                         }));
-                    } else {
-                        // If you only get user data without tokens
-                        const currentAccessToken = tokenService.getAccessToken();
-                        const currentRefreshToken = tokenService.getRefreshToken();
-                        
-                        if (currentAccessToken && currentRefreshToken) {
-                            dispatch(userLoggedIn({ 
-                                accessToken: currentAccessToken,
-                                refreshToken: currentRefreshToken,
-                                user: data.user,
-                            }));
-                        }
-                    } 
+                    }
                 } catch (error:any) {
                     // Set loading to false in case of error
                     dispatch(setLoading(false));
