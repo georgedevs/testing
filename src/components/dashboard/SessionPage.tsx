@@ -251,8 +251,9 @@ const SessionPage = () => {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_SERVER_URL}/session/${activeBooking.booking._id}/status`,
           {
+            credentials: 'include',
             headers: {
-              'Authorization': `Bearer ${accessToken}`
+             'Content-Type': 'application/json'
             }
           }
         );
@@ -534,8 +535,8 @@ const SessionPage = () => {
         `${process.env.NEXT_PUBLIC_SERVER_URL}/participant/${activeBooking.booking._id}/join`,
         {
           method: 'POST',
+          credentials:'include',
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json'
           }
         }
@@ -561,8 +562,8 @@ const SessionPage = () => {
         `${process.env.NEXT_PUBLIC_SERVER_URL}/participant/${activeBooking.booking._id}/leave`,
         {
           method: 'POST',
+          credentials:'include',
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
@@ -633,9 +634,7 @@ const SessionPage = () => {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/meeting-token/${activeBooking.booking._id}`, 
         {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
+          credentials:'include'
         }
       );
       
@@ -739,8 +738,8 @@ const SessionPage = () => {
           `${process.env.NEXT_PUBLIC_SERVER_URL}/complete-extended/${activeBooking.booking._id}`, 
           {
             method: 'POST',
+            credentials:'include',
             headers: {
-              'Authorization': `Bearer ${accessToken}`,
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
@@ -795,8 +794,8 @@ const SessionPage = () => {
         `${process.env.NEXT_PUBLIC_SERVER_URL}/complete-extended/${activeBooking.booking._id}`,
         {
           method: 'POST',
+          credentials: 'include',
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({

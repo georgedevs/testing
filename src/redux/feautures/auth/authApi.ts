@@ -1,8 +1,8 @@
+// src/redux/features/auth/authApi.ts (UPDATED)
 import { IUser } from "@/redux/types/auth";
 import { apiSlice } from "../api/apiSlice";
 import { userLoggedIn, userLoggedOut, userRegistration } from "./authSlice";
 import { AvatarResponse, UpdateAvatarResponse } from "@/types/avatar";
-import { tokenService } from "@/utils/tokenService";
 
 interface LoginRequest {
   email: string;
@@ -12,17 +12,15 @@ interface LoginRequest {
 interface LoginResponse {
   success: boolean;
   user: IUser;
-  accessToken: string;
-  refreshToken:string;
 }
 
 type RegistrationData = {
-  email:string;
-  password:string;
-  fullName?:string;
-  gender?:string;
-  role?:string;
-  registrationToken?:string;
+  email: string;
+  password: string;
+  fullName?: string;
+  gender?: string;
+  role?: string;
+  registrationToken?: string;
 };
 
 type RegistrationResponse = {
@@ -59,54 +57,51 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     login: builder.mutation<LoginResponse, LoginRequest>({
       query: (credentials) => ({
-          url: "login",
-          method: "POST",
-          body: credentials
+        url: "login",
+        method: "POST",
+        body: credentials,
+        credentials: "include" as const,
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-          try {
-              const result = await queryFulfilled;
-              const { accessToken, refreshToken, user } = result.data;
-              
-              // Dispatch with both tokens
-              dispatch(
-                  userLoggedIn({
-                      accessToken,
-                      refreshToken,
-                      user
-                  })
-              );
-          } catch (error: any) {
-              console.error("Login error:", error);
-              tokenService.clearTokens();
-          }
+        try {
+          const result = await queryFulfilled;
+          const { user } = result.data;
+          
+          // Dispatch with user data
+          dispatch(
+            userLoggedIn({
+              user
+            })
+          );
+        } catch (error: any) {
+          console.error("Login error:", error);
+        }
       },
-  }),
-  logout: builder.mutation<{ success: boolean; message: string }, void>({
-    query: () => ({
+    }),
+    logout: builder.mutation<{ success: boolean; message: string }, void>({
+      query: () => ({
         url: "logout",
         method: "POST",
-        headers: {
-            Authorization: `Bearer ${tokenService.getAccessToken()}`
-        }
-    }),
-    async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        credentials: "include" as const,
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-            await queryFulfilled;
-            tokenService.clearTokens();
-            dispatch(apiSlice.util.resetApiState());
-            dispatch(userLoggedOut());
+          await queryFulfilled;
+          dispatch(apiSlice.util.resetApiState());
+          dispatch(userLoggedOut());
         } catch (error) {
-            console.error("Logout error:", error);
-            tokenService.clearTokens();
+          console.error("Logout error:", error);
         }
-    },
-}),
+      },
+    }),
+    // Other endpoints remain mostly the same, just ensure they include 'credentials: "include"'
+    // in their query configuration
     forgotPassword: builder.mutation({
       query: (email) => ({
         url: "forgot-password",
         method: "POST",
         body: { email },
+        credentials: "include" as const,
       }),
     }),
     generateCounselorLink: builder.mutation({
@@ -114,7 +109,7 @@ export const authApi = apiSlice.injectEndpoints({
         url: 'generate-counselor-link',
         method: 'POST',
         body: data,
-        credentials: 'include',
+        credentials: 'include' as const,
       }),
     }),
     resetPassword: builder.mutation({
@@ -125,13 +120,14 @@ export const authApi = apiSlice.injectEndpoints({
           resetToken,
           newPassword,
         },
+        credentials: "include" as const,
       }),
     }),
     getPendingCounselors: builder.query<{ success: boolean; count: number; counselors: any[] }, void>({
       query: () => ({
         url: 'admin/pending-counselors',
         method: 'GET',
-        credentials: 'include',
+        credentials: 'include' as const,
       }),
       providesTags: ['Counselors'],
     }),
@@ -140,7 +136,7 @@ export const authApi = apiSlice.injectEndpoints({
       query: (counselorId) => ({
         url: `admin/counselors/${counselorId}/approve`,
         method: 'PUT',
-        credentials: 'include',
+        credentials: 'include' as const,
       }),
       invalidatesTags: ['Counselors'],
     }),
@@ -150,12 +146,15 @@ export const authApi = apiSlice.injectEndpoints({
         url: `admin/counselors/${counselorId}/reject`,
         method: 'DELETE',
         body: { reason },
-        credentials: 'include',
+        credentials: 'include' as const,
       }),
       invalidatesTags: ['Counselors'],
     }),
     getAvatars: builder.query<AvatarResponse, void>({
-      query: () => 'avatars',
+      query: () => ({
+        url: 'avatars',
+        credentials: 'include' as const,
+      }),
       providesTags: ['Avatar'],
     }),
     updateAvatar: builder.mutation<UpdateAvatarResponse, string>({
@@ -163,7 +162,7 @@ export const authApi = apiSlice.injectEndpoints({
         url: 'update-avatar', 
         method: 'POST',
         body: { avatarId },
-        credentials:'include'
+        credentials: 'include' as const,
       }),
       invalidatesTags: ['Avatar'],
     }),

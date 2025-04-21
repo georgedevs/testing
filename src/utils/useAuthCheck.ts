@@ -1,27 +1,24 @@
-// src/utils/useAuthCheck.ts
+// src/utils/useAuthCheck.ts (UPDATED)
 import { useEffect, useState } from 'react';
-import { tokenService } from '@/utils/tokenService';
 import { useLoadUserQuery } from '@/redux/feautures/api/apiSlice';
+import { authService } from '@/utils/authService';
 
 export const useAuthCheck = () => {
-  // Only run the API query if we have a token stored
-  const hasStoredToken = Boolean(tokenService.getAccessToken());
+  // Check if there's a stored login state
+  const isLoggedInLocally = authService.isLoggedIn();
   
-  // Skip the query if we don't have a token to check
+  // Run the API query if user is potentially logged in
   const { isLoading, error, refetch } = useLoadUserQuery(undefined, {
-    skip: !hasStoredToken,
-    // Additional RTK Query options to reduce refetching
-    refetchOnMountOrArgChange: false,
-    refetchOnFocus: false,
-    refetchOnReconnect: false,
+    skip: !isLoggedInLocally,
+    // Additional RTK Query options
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
   });
 
   return {
-    isLoading: hasStoredToken ? isLoading : false,
-    // Don't expose auth errors to components using this hook
-    // Components only need to know if a check is in progress
-    checkComplete: !hasStoredToken || !isLoading,
-    // Only make this available if you need to manually trigger a recheck
+    isLoading: isLoggedInLocally ? isLoading : false,
+    checkComplete: !isLoggedInLocally || !isLoading,
     revalidate: refetch
   };
 };

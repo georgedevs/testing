@@ -48,8 +48,6 @@ export interface ICounselor {
 }
 
 export interface AuthState {
-  token: string;
-  activationToken: string;
   user: IUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;

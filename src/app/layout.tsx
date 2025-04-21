@@ -6,6 +6,7 @@ import Script from "next/script";
 import { SocketProvider } from "@/components/SocketProvider";
 import { type ReactNode } from 'react';
 import LoadingScreen from "@/components/LoadingScreen";
+import SessionStatusChecker from "@/components/SessionStatusChecker";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         className={`${plusJakartaSans.variable} ${outfit.variable} min-h-screen bg-white dark:bg-gray-900 antialiased`}
       >
         <Providers>
+          <SessionStatusChecker/>
           <SocketProvider>
             <LoadingScreen/>
             {children} 

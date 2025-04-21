@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import Loader from '@/components/Loader';
 import { useSelector } from 'react-redux';
 import OfflineStatusHandler from '@/components/OfflineStatusHandler';
-import { useTokenSync } from './hooks/useTokenSync';
 import { useAuthCheck } from '@/utils/useAuthCheck';
 
 const publicRoutes = [
@@ -26,7 +25,6 @@ export default function AuthWrapper({
 }: {
     children: React.ReactNode;
 }) {
-    useTokenSync();
     const { isLoading, checkComplete } = useAuthCheck();
     
     const { user, isAuthenticated } = useSelector((state: any) => state.auth);
