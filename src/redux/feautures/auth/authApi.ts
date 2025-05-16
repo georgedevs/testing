@@ -94,8 +94,6 @@ export const authApi = apiSlice.injectEndpoints({
         }
       },
     }),
-    // Other endpoints remain mostly the same, just ensure they include 'credentials: "include"'
-    // in their query configuration
     forgotPassword: builder.mutation({
       query: (email) => ({
         url: "forgot-password",

@@ -41,6 +41,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClo
   const [resetToken, setResetToken] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
+  const [userEmail, setUserEmail] = useState<string>('');
   
   const [forgotPassword, { isLoading: isSendingOTP }] = useForgotPasswordMutation();
   const [resetPassword, { isLoading: isResetting }] = useResetPasswordMutation();
@@ -50,6 +51,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClo
     setResetToken('');
     setErrorMessage('');
     setSuccessMessage('');
+    setUserEmail('');
     onClose();
   };
 
@@ -57,25 +59,36 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClo
     try {
       setErrorMessage('');
       const response = await forgotPassword(values.email).unwrap();
-      setResetToken(response.resetToken);
-      setSuccessMessage('OTP sent successfully to your email!');
+      
+      // Store the user's email for the next step
+      setUserEmail(values.email);
+      
+      // In development mode, the API might return a resetToken for testing
+      if (response.resetToken) {
+        setResetToken(response.resetToken);
+      }
+      
+      setSuccessMessage('If your email exists in our system, you will receive an OTP shortly.');
       setStep('reset');
     } catch (error: any) {
-      setErrorMessage(error.data?.message || 'Failed to send OTP. Please try again.');
+      setErrorMessage(error.data?.message || 'An error occurred. Please try again later.');
     }
   };
 
   const handleResetSubmit = async (values: any) => {
     try {
       setErrorMessage('');
-      await resetPassword({
-        resetToken,
-        newPassword: values.newPassword,
-      }).unwrap();
+      
+      // If we don't have a token from the API (production mode), use email and OTP
+      const resetData = resetToken 
+        ? { resetToken, newPassword: values.newPassword }
+        : { email: userEmail, otp: values.otp, newPassword: values.newPassword };
+        
+      await resetPassword(resetData).unwrap();
       setSuccessMessage('Password reset successful!');
       setTimeout(handleClose, 2000);
     } catch (error: any) {
-      setErrorMessage(error.data?.message || 'Failed to reset password. Please try again.');
+      setErrorMessage(error.data?.message || 'Invalid or expired OTP. Please try again.');
     }
   };
 
@@ -92,7 +105,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClo
           <p className="text-center text-gray-500 dark:text-gray-400 text-sm sm:text-base">
             {step === 'email' 
               ? "Don't worry! It happens. Please enter your email address." 
-              : "We've sent you an OTP. Please check your email."}
+              : "Please enter the OTP sent to your email."}
           </p>
         </DialogHeader>
 

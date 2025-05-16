@@ -51,4 +51,5 @@ export interface AuthState {
   user: IUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  activationToken:string | null;
 }

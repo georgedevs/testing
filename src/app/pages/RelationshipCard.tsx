@@ -1,6 +1,5 @@
 'use client'
 import React, { useRef, useState, useEffect } from 'react';
-import Link from 'next/link';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { BellRing, ChevronLeft, ChevronRight, Heart, HeartCrack, MonitorPlay, Search, Sparkles, Unlink, Users, } from 'lucide-react';
@@ -71,50 +70,42 @@ const RelationshipCards = () => {
         {
             title: "'Stuck' Relationships",
             description: "Addressing and overcoming recurring issues/arguments that hinder the growth and progress of the relationship.",
-            icon: Users,
-            link: "/resources/stuck-relationships"
+            icon: Users
         },
         {
             title: "Stale Relationships",   
             description: "Help to revitalise and bring back excitement and connection in relationships that have lost their spark.",
-            icon: Sparkles,
-            link: "/services/stale-relationships"
+            icon: Sparkles
         },
         {
             title: "Infidelity or Affairs",
             description: "Navigating the hurt and emotional turmoil. Then rebuilding trust after a breach of fidelity.",
-            icon: HeartCrack,
-            link: "/services/infidelity"
+            icon: HeartCrack
         },
         {
             title: "Relationship Breakups",
             description: "Providing support and guidance during the difficult process of ending a relationship.",
-            icon: Unlink,
-            link: "/services/breakups"
+            icon: Unlink
         },
         {
             title: "Intimacy Problems",
             description: "Working through challenges related to emotional and physical intimacy to foster a deeper connection.",
-            icon: Heart,
-            link: "/services/intimacy-problems"
+            icon: Heart
         },
         {
             title: "The Impact of Pornography",
             description: "Helping individuals and couples address the effects of pornography on their relationship.",
-            icon: MonitorPlay,
-            link: "/services/pornography-impact"
+            icon: MonitorPlay
         },
         {
             title: "Pre-marital Counselling",
             description: "Preparing couples for marriage by exploring important topics by engaging in open communication.",
-            icon: BellRing,
-            link: "/services/premarital-counseling"
+            icon: BellRing
         },
         {
             title: "Jealousy and Suspicion",
             description: "Addressing feelings of jealousy and suspicion to build trust and security within the relationship.",
-            icon: Search,
-            link: "/services/jealousy-suspicion"
+            icon: Search
         }
     ];
 
@@ -193,47 +184,47 @@ const RelationshipCards = () => {
                 </motion.h2>
                 
                 <div className="relative">
-                {showControls && (
-    <>
-        <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: scrollPosition > 0 ? 1 : 0 }}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10"
-            onClick={() => scroll('left')}
-        >
-            <div className="p-2 rounded-full bg-white dark:bg-gray-700 shadow-lg">
-                <ChevronLeft className="w-6 h-6 text-purple-600 dark:text-orange-500" />
-            </div>
-        </motion.button>
+                    {showControls && (
+                        <>
+                            <motion.button
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: scrollPosition > 0 ? 1 : 0 }}
+                                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10"
+                                onClick={() => scroll('left')}
+                            >
+                                <div className="p-2 rounded-full bg-white dark:bg-gray-700 shadow-lg">
+                                    <ChevronLeft className="w-6 h-6 text-purple-600 dark:text-orange-500" />
+                                </div>
+                            </motion.button>
 
-        <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: scrollPosition < maxScroll ? 1 : 0 }}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10"
-            onClick={() => scroll('right')}
-        >
-            <div className="p-2 rounded-full bg-white dark:bg-gray-700 shadow-lg">
-                <ChevronRight className="w-6 h-6 text-purple-600 dark:text-orange-500" />
-            </div>
-        </motion.button>
+                            <motion.button
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: scrollPosition < maxScroll ? 1 : 0 }}
+                                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10"
+                                onClick={() => scroll('right')}
+                            >
+                                <div className="p-2 rounded-full bg-white dark:bg-gray-700 shadow-lg">
+                                    <ChevronRight className="w-6 h-6 text-purple-600 dark:text-orange-500" />
+                                </div>
+                            </motion.button>
 
-        {/* Scroll progress indicator */}
-        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex space-x-1 pb-4">
-            <motion.div
-                className="h-1 rounded-full bg-purple-600/30 dark:bg-orange-500/30"
-                style={{ width: '100px' }}
-            >
-                <motion.div 
-                    className="h-full bg-purple-600 dark:bg-orange-500 rounded-full"
-                    style={{ 
-                        width: `${(scrollPosition / maxScroll) * 100}%`,
-                        transition: 'width 0.1s ease-out'
-                    }}
-                />
-            </motion.div>
-        </div>
-    </>
-)}
+                            {/* Scroll progress indicator */}
+                            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex space-x-1 pb-4">
+                                <motion.div
+                                    className="h-1 rounded-full bg-purple-600/30 dark:bg-orange-500/30"
+                                    style={{ width: '100px' }}
+                                >
+                                    <motion.div 
+                                        className="h-full bg-purple-600 dark:bg-orange-500 rounded-full"
+                                        style={{ 
+                                            width: `${(scrollPosition / maxScroll) * 100}%`,
+                                            transition: 'width 0.1s ease-out'
+                                        }}
+                                    />
+                                </motion.div>
+                            </div>
+                        </>
+                    )}
 
                     <motion.div 
                         ref={scrollContainerRef}
@@ -263,7 +254,7 @@ const RelationshipCards = () => {
                                         }}
                                         className="h-full"
                                     >
-                                      <Card className="group relative overflow-hidden p-6 md:p-8 rounded-2xl w-full h-full transition-all duration-300 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 transform-gpu hover:shadow-[0_0_15px_-5px] hover:shadow-purple-500/30 dark:hover:shadow-orange-500/30 before:absolute before:inset-0 before:bg-gradient-to-br before:from-purple-600/5 before:to-orange-500/5 dark:before:from-orange-400/5 dark:before:to-purple-500/5 before:opacity-0 before:transition-opacity hover:before:opacity-100">
+                                        <Card className="group relative overflow-hidden p-6 md:p-8 rounded-2xl w-full h-full transition-all duration-300 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 transform-gpu hover:shadow-[0_0_15px_-5px] hover:shadow-purple-500/30 dark:hover:shadow-orange-500/30 before:absolute before:inset-0 before:bg-gradient-to-br before:from-purple-600/5 before:to-orange-500/5 dark:before:from-orange-400/5 dark:before:to-purple-500/5 before:opacity-0 before:transition-opacity hover:before:opacity-100">
                                             <motion.div 
                                                 className="absolute inset-0 opacity-0 group-hover:opacity-10 bg-gradient-to-br from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500"
                                                 initial={{ rotate: 0, opacity: 0 }}
@@ -281,17 +272,17 @@ const RelationshipCards = () => {
                                             />
                                             
                                             <div className="relative z-10">
-                                            <motion.div 
-    variants={floatingAnimation}
-    initial="initial"
-    animate="animate"
-    className="text-4xl mb-4 md:mb-6 opacity-90 dark:opacity-80"
->
-    {React.createElement(card.icon, {
-        size: 36,
-        className: "text-purple-600 dark:text-orange-400"
-    })}
-</motion.div>
+                                                <motion.div 
+                                                    variants={floatingAnimation}
+                                                    initial="initial"
+                                                    animate="animate"
+                                                    className="text-4xl mb-4 md:mb-6 opacity-90 dark:opacity-80"
+                                                >
+                                                    {React.createElement(card.icon, {
+                                                        size: 36,
+                                                        className: "text-purple-600 dark:text-orange-400"
+                                                    })}
+                                                </motion.div>
                                                 <motion.h3 
                                                     className="text-lg md:text-xl font-semibold mb-2 md:mb-4 bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent"
                                                     whileHover={{ scale: 1.05 }}
@@ -299,31 +290,9 @@ const RelationshipCards = () => {
                                                     {card.title}
                                                 </motion.h3>
                                                 
-                                                <p className="text-sm mb-4 md:mb-6 leading-relaxed text-gray-600 dark:text-gray-300">
+                                                <p className="text-sm mb-4 leading-relaxed text-gray-600 dark:text-gray-300">
                                                     {card.description}
                                                 </p>
-                                                
-                                                {card.link && (
-                                                    <Link href={card.link}>
-                                                        <motion.span 
-                                                            whileHover={{ x: 10 }}
-                                                            className="text-sm font-medium text-purple-600 dark:text-orange-400 hover:text-purple-500 dark:hover:text-orange-300 flex items-center gap-2"
-                                                        >
-                                                            Learn more
-                                                            <motion.span 
-                                                                className="text-lg"
-                                                                animate={{ x: [0, 5, 0] }}
-                                                                transition={{ 
-                                                                    duration: 1.5, 
-                                                                    repeat: Infinity,
-                                                                    ease: "easeInOut" 
-                                                                }}
-                                                            >
-                                                                →
-                                                            </motion.span>
-                                                        </motion.span>
-                                                    </Link>
-                                                )}
                                             </div>
                                         </Card>
                                     </motion.div>

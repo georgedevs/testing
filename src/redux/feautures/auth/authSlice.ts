@@ -6,6 +6,7 @@ const initialState: AuthState = {
   user: null,
   isAuthenticated: authService.isLoggedIn(),
   isLoading: false,
+  activationToken: null,
 };
 
 const authSlice = createSlice({
@@ -16,7 +17,7 @@ const authSlice = createSlice({
       state.isLoading = action.payload;
     },
     userRegistration: (state, action: PayloadAction<{ token: string }>) => {
-      // Keep this for the registration flow
+      state.activationToken = action.payload.token;
     },
     userLoggedIn: (state, action: PayloadAction<{ user: IUser }>) => {
       state.user = action.payload.user;

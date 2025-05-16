@@ -123,19 +123,6 @@ useEffect(() => {
   const navigationItems: NavigationItem[] = [
     { label: 'About', href: '/about' },
     { label: 'Services', href: '/services' },
-    { 
-      label: 'Resources',
-      dropdown: [
-        { label: 'Stuck Relationships', href: '/resources/stuck-relationships' },
-        { label: 'Stale Relationships', href: '/resources/stale-relationships' },
-        { label: 'Infidelity or Affairs', href: '/resources/infidelity' },
-        { label: 'Relationship Breakups', href: '/resources/breakups' },
-        { label: 'Intimacy Problems', href: '/resources/intimacy' },
-        { label: 'Impact of Pornography', href: '/resources/pornography-impact' },
-        { label: 'Pre-marital Counselling', href: '/resources/premarital' },
-        { label: 'Jealousy and Suspicion', href: '/resources/jealousy' }
-      ] 
-    },
     { label: 'Stories', href: '/stories' }
   ];
 

@@ -28,7 +28,11 @@ export const DashboardHeader = () => {
     try {
       await logout().unwrap();
       toast.success('Logged out successfully');
-      router.push('/signin');
+      localStorage.removeItem('auth_status');
+      setTimeout(() => {
+        // Force a hard redirect
+        window.location.href = '/signin';
+      }, 100);
     } catch (error) {
       toast.error('Failed to logout. Please try again.');
       console.error('Logout error:', error);

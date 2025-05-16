@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { FaFacebookF, FaInstagram } from "react-icons/fa";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Mail } from "lucide-react";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -60,6 +60,7 @@ const Footer = () => {
   ];
   
   const phoneNumber = "2348032035563";
+  const emailAddress = "support@micounselor.com";
 
   return (
     <motion.footer
@@ -153,13 +154,20 @@ const Footer = () => {
                   +234 803 203 5563
                 </span>
               </motion.a>
-              <motion.div
+              
+              <motion.a
+                href={`mailto:${emailAddress}`}
                 whileHover={{ x: 10 }}
-                className="flex items-center space-x-4 text-gray-700 dark:text-gray-300"
+                className="flex items-center space-x-4 text-gray-700 dark:text-gray-300 group"
               >
-                <span className="text-xl">📧</span>
-                <span>support@micounselor.com</span>
-              </motion.div>
+                <span className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-500/20 text-blue-600 group-hover:bg-blue-500/30 transition-colors duration-300">
+                  <Mail size={20} />
+                </span>
+                <span className="group-hover:text-blue-500 transition-colors duration-300">
+                  {emailAddress}
+                </span>
+              </motion.a>
+              
               <div className="flex space-x-4 mt-4">
                 {['facebook', 'instagram'].map((platform) => (
                   <motion.a

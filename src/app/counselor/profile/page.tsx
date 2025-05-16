@@ -82,9 +82,10 @@ const CounselorProfilePage = () => {
       await deleteAccount({ password: deletePassword }).unwrap();
       toast.success("Account deleted successfully");
       // Redirect will happen automatically due to the auth state change
-    } catch (error) {
-      setDeleteError("Incorrect password. Please try again.");
-      toast.error("Failed to delete account");
+    } catch (error:any) {
+      const errorMesage = error?.data?.message || "Failed to delete account";
+      setDeleteError(errorMesage);
+      toast.error(errorMesage);
     }
   };
 
