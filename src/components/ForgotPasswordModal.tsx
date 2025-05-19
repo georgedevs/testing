@@ -63,7 +63,6 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClo
       // Store the user's email for the next step
       setUserEmail(values.email);
       
-      // In development mode, the API might return a resetToken for testing
       if (response.resetToken) {
         setResetToken(response.resetToken);
       }

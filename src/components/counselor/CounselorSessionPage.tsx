@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { format, parseISO, subMinutes, addMinutes } from 'date-fns';
+import { format, subMinutes, addMinutes } from 'date-fns';
 import { Loader2, AlertCircle, InfoIcon, Clock, RefreshCcw } from 'lucide-react';
 import Script from 'next/script';
 import { toast } from 'sonner';
@@ -73,7 +73,7 @@ const CounselorSessionPage = () => {
     return false;
   };
 
-  // Set up global error handler for media errors
+  // global error handler for media errors
   useEffect(() => {
     const handleError = (e: ErrorEvent) => {
       if (handleDailyPlayError(e.error || e)) {
@@ -129,7 +129,7 @@ const CounselorSessionPage = () => {
 
     const handleGracePeriod = (data: any) => {
       console.log('Grace period update:', data);
-      if (data.meetingId === activeSession.booking._id) {
+      if (data.meetingId === activeSession.booking?._id) {
         setGracePeriodActive(true);
         const endTime = new Date(data.graceEndTime).getTime();
         const now = new Date().getTime();
@@ -148,7 +148,7 @@ const CounselorSessionPage = () => {
 
     const handleSessionCompleted = (data: any) => {
       console.log('Session completed update:', data);
-      if (data.meetingId === activeSession.booking._id) {
+      if (data.meetingId === activeSession.booking?._id) {
         toast.success('The session has been completed', {
           duration: 5000,
           position: 'top-center'
@@ -248,10 +248,7 @@ const CounselorSessionPage = () => {
     const pollMeetingStatus = async () => {
       if (!activeSession?.booking?._id || !hasJoinedSuccessfully) return;
       
-      try {
-        const accessToken = localStorage.getItem('access_token');
-        if (!accessToken) return;
-        
+      try {     
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_SERVER_URL}/session/${activeSession.booking._id}/status`,
           {
@@ -483,7 +480,7 @@ const CounselorSessionPage = () => {
     // Session ends 45 minutes after scheduled time
     const sessionEnd = new Date(meetingDateTime.getTime() + (45 * 60 * 1000));
   
-    // Log for debugging - include timezone info
+    // Log for debugging - to include timezone info
     console.log('Session window check:', {
       now: now.toISOString(),
       nowLocal: now.toString(),
@@ -528,10 +525,7 @@ const CounselorSessionPage = () => {
   const notifyServerJoined = async () => {
     if (!activeSession?.booking?._id) return;
     
-    try {
-      const accessToken = localStorage.getItem('access_token');
-      if (!accessToken) return;
-      
+    try {      
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/participant/${activeSession.booking._id}/join`,
         {
@@ -556,9 +550,6 @@ const CounselorSessionPage = () => {
     if (!activeSession?.booking?._id) return;
     
     try {
-      const accessToken = localStorage.getItem('access_token');
-      if (!accessToken) return;
-      
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/participant/${activeSession.booking._id}/leave`,
         {
@@ -624,13 +615,6 @@ const CounselorSessionPage = () => {
     leaveInProgressRef.current = false;
 
     try {
-      // Get access token from localStorage
-      const accessToken = localStorage.getItem('access_token');
-      
-      if (!accessToken) {
-        throw new Error('Authentication token not found. Please log in again.');
-      }
-
       console.log(`Requesting meeting token for meeting: ${activeSession.booking._id}`);
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/meeting-token/${activeSession.booking._id}`, 
@@ -729,11 +713,6 @@ const CounselorSessionPage = () => {
       // Only fully complete the session if we're skipping grace period
       if (hasJoinedSuccessfully && activeSession?.booking?._id && skipGracePeriod) {
         console.log('Completing session (skipping grace period)...');
-        const accessToken = localStorage.getItem('access_token');
-        
-        if (!accessToken) {
-          throw new Error('Authentication token not found');
-        }
 
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_SERVER_URL}/complete-extended/${activeSession.booking._id}`, 
@@ -788,9 +767,6 @@ const CounselorSessionPage = () => {
     if (!activeSession?.booking?._id) return;
     
     try {
-      const accessToken = localStorage.getItem('access_token');
-      if (!accessToken) return;
-      
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/complete-extended/${activeSession.booking._id}`,
         {

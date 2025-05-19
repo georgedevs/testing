@@ -76,19 +76,13 @@ export const useAutoAbandon = (booking: any) => {
       if (shouldAbandon) {
         console.log('Session should be marked as abandoned - no one joined within 15 minutes');
         
-        // Get the authorization token
-        const accessToken = localStorage.getItem('access_token');
-        if (!accessToken) {
-          console.error('No access token found');
-          return;
-        }
 
         // Report no-show
         fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/report-no-show`, {
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
           },
           body: JSON.stringify({
             meetingId: booking._id,

@@ -18,6 +18,9 @@ export interface IUser {
   age?: number;
   currentCounselor?: ICounselor;
   tourViewed?: boolean;
+  completedSessions:number;
+  activeClients:number;
+  totalRatings:number;
 }
 
 export interface ICounselorProfile {

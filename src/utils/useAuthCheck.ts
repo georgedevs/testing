@@ -1,16 +1,13 @@
-// src/utils/useAuthCheck.ts (UPDATED)
 import { useEffect, useState } from 'react';
 import { useLoadUserQuery } from '@/redux/feautures/api/apiSlice';
 import { authService } from '@/utils/authService';
 
 export const useAuthCheck = () => {
-  // Check if there's a stored login state
   const isLoggedInLocally = authService.isLoggedIn();
   
   // Run the API query if user is potentially logged in
   const { isLoading, error, refetch } = useLoadUserQuery(undefined, {
     skip: !isLoggedInLocally,
-    // Additional RTK Query options
     refetchOnMountOrArgChange: true,
     refetchOnFocus: true,
     refetchOnReconnect: true,

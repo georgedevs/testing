@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { useLoadUserQuery } from '@/redux/feautures/api/apiSlice';
-import AdminVerificationModal from '@/components/admin/AdminVerificationModal';
 import LoadingScreen from '../LoadingScreen';
 
 interface ProtectedRouteProps {
@@ -17,7 +16,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const router = useRouter();
   const { user } = useSelector((state: any) => state.auth);
   const { isLoading } = useLoadUserQuery();
-  const [showVerification, setShowVerification] = useState(false);
 
   useEffect(() => {
     if (!isLoading) {
@@ -25,27 +23,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         router.push('/signin');
       } else if (!allowedRoles.includes(user.role)) {
         handleUnauthorizedAccess(user.role, router);
-      } else if (user.role === 'admin') {
-        const isVerified = sessionStorage.getItem('adminVerified');
-        if (!isVerified) {
-          setShowVerification(true);
-        }
       }
     }
   }, [user, isLoading, router, allowedRoles]);
-
-  const handleVerification = () => {
-    setShowVerification(false);
-  };
 
   if (isLoading) {
     return <LoadingScreen />;
   }
 
   if (user && allowedRoles.includes(user.role)) {
-    if (user.role === 'admin' && showVerification) {
-      return <AdminVerificationModal isOpen={true} onVerify={handleVerification} />;
-    }
     return <>{children}</>;
   }
 

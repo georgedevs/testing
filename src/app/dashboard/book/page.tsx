@@ -1,4 +1,3 @@
-// src/app/client/book/page.tsx
 'use client'
 import React, { useEffect } from 'react';
 import Heading from '@/components/Heading';

@@ -7,7 +7,7 @@ import { useUpdateTourStatusMutation } from '@/redux/feautures/user/userApi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from 'next-themes';
 
-// Dynamically import Joyride to avoid SSR issues
+// Dynamically importing Joyride to avoid SSR issues
 const Joyride = dynamic(
   () => import('react-joyride').then((mod) => mod.default),
   { ssr: false }

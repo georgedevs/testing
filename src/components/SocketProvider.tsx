@@ -1,4 +1,3 @@
-// src/components/SocketProvider.tsx
 'use client';
 import { createContext, useContext, useEffect, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
@@ -40,7 +39,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     socketInstance.on('connect', () => {
-      console.log('Socket connected:', socketInstance.id);
+      // console.log('Socket connected:', socketInstance.id);
       // Authenticate socket connection
       socketInstance.emit('authenticate', {
         userId: user._id,
@@ -49,11 +48,11 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     socketInstance.on('connect_error', (error) => {
-      console.error('Socket connection error:', error);
+      // console.error('Socket connection error:', error);
     });
 
     socketInstance.on('disconnect', (reason) => {
-      console.log('Socket disconnected:', reason);
+      // console.log('Socket disconnected:', reason);
     });
 
     setSocket(socketInstance);

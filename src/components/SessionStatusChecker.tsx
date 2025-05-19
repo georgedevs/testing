@@ -17,5 +17,5 @@ export default function SessionStatusChecker() {
     }
   }, [isError, dispatch]);
 
-  return null; // This component doesn't render anything
+  return null; 
 }

@@ -245,8 +245,6 @@ const SessionPage = () => {
       if (!activeBooking?.booking?._id || !hasJoinedSuccessfully) return;
       
       try {
-        const accessToken = localStorage.getItem('access_token');
-        if (!accessToken) return;
         
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_SERVER_URL}/session/${activeBooking.booking._id}/status`,
@@ -528,8 +526,6 @@ const SessionPage = () => {
     if (!activeBooking?.booking?._id) return;
     
     try {
-      const accessToken = localStorage.getItem('access_token');
-      if (!accessToken) return;
       
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/participant/${activeBooking.booking._id}/join`,
@@ -555,9 +551,6 @@ const SessionPage = () => {
     if (!activeBooking?.booking?._id) return;
     
     try {
-      const accessToken = localStorage.getItem('access_token');
-      if (!accessToken) return;
-      
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/participant/${activeBooking.booking._id}/leave`,
         {
@@ -623,13 +616,6 @@ const SessionPage = () => {
     leaveInProgressRef.current = false;
 
     try {
-      // Get access token from localStorage
-      const accessToken = localStorage.getItem('access_token');
-      
-      if (!accessToken) {
-        throw new Error('Authentication token not found. Please log in again.');
-      }
-
       console.log(`Requesting meeting token for meeting: ${activeBooking.booking._id}`);
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/meeting-token/${activeBooking.booking._id}`, 
@@ -728,11 +714,6 @@ const SessionPage = () => {
       // Only fully complete the session if we're skipping grace period
       if (hasJoinedSuccessfully && activeBooking?.booking?._id && skipGracePeriod) {
         console.log('Completing session (skipping grace period)...');
-        const accessToken = localStorage.getItem('access_token');
-        
-        if (!accessToken) {
-          throw new Error('Authentication token not found');
-        }
 
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_SERVER_URL}/complete-extended/${activeBooking.booking._id}`, 
@@ -787,8 +768,6 @@ const SessionPage = () => {
     if (!activeBooking?.booking?._id) return;
     
     try {
-      const accessToken = localStorage.getItem('access_token');
-      if (!accessToken) return;
       
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/complete-extended/${activeBooking.booking._id}`,

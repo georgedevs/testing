@@ -1,4 +1,3 @@
-// src/middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -8,8 +7,6 @@ export function middleware(request: NextRequest) {
     const path = request.nextUrl.pathname;
     const isPublicPath = publicRoutes.includes(path);
 
-    // We'll check authentication client-side since we can't access localStorage in middleware
-    // This middleware will only handle public route redirects
     if (isPublicPath) {
         return NextResponse.next();
     }

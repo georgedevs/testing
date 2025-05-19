@@ -51,7 +51,7 @@ const CounselorDashboardTour: React.FC<CounselorDashboardTourProps> = ({
     }
   }, [isLoadingUser, user, isAvatarModalOpen]);
 
-  // Tour steps configuration with enhanced content and dark mode compatibility
+  // Tour steps configuration with dark mode compatibility
   const steps = [
     {
       target: '[data-tutorial="counselor-notifications"]',

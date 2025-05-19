@@ -7,14 +7,12 @@ import Footer from '../pages/Footer';
 import { Check, MessageCircle, PhoneCall, HeartHandshake } from 'lucide-react';
 
 const ServicesPage = () => {
-  // Refs for scroll animations
   const containerRef = useRef(null);
   const heroRef = useRef(null);
   const servicesRef = useRef(null);
   const philosophyRef = useRef(null);
   const ctaRef = useRef(null);
 
-  // Scroll progress animations
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"]
@@ -24,13 +22,11 @@ const ServicesPage = () => {
   const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
   const heroY = useTransform(scrollYProgress, [0, 0.2], [0, -50]);
 
-  // Viewport detection
   const isHeroInView = useInView(heroRef, { once: false, margin: "-100px" });
   const isServicesInView = useInView(servicesRef, { once: false, margin: "-100px" });
   const isPhilosophyInView = useInView(philosophyRef, { once: false, margin: "-100px" });
   const isCtaInView = useInView(ctaRef, { once: false, margin: "-100px" });
 
-  // Animation variants
   const fadeInUpVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: { opacity: 1, y: 0 }

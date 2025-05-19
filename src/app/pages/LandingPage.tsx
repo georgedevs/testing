@@ -14,12 +14,10 @@ const LandingPage = () => {
   const { isLoading } = useLoadUserQuery();
   const { isAuthenticated, redirectToUserDashboard } = useAuth();
 
-  // Scroll animations
   const { scrollY } = useScroll();
   const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
   const heroScale = useTransform(scrollY, [0, 300], [1, 0.95]);
 
-  // Features section ref for viewport detection
   const featuresRef = useRef(null);
   const isFeaturesSectionInView = useInView(featuresRef, { 
     once: false,

@@ -1,4 +1,3 @@
-// src/redux/features/api/apiSlice.ts (UPDATED)
 import { createApi, fetchBaseQuery, BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import { userLoggedIn, userLoggedOut, setLoading } from "../auth/authSlice";
 import { Mutex } from 'async-mutex';
@@ -14,7 +13,7 @@ const mutex = new Mutex();
 // Base query with credentials
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_SERVER_URL,
-  credentials: 'include', // Important: includes cookies with every request
+  credentials: 'include', 
   prepareHeaders: (headers) => {
     // No Authorization header needed with cookie-based auth
     return headers;

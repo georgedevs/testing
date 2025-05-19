@@ -243,7 +243,7 @@ const RelationshipCards = () => {
                                 <motion.div 
                                     key={index}
                                     variants={cardVariants}
-                                    className="flex-shrink-0 w-[280px] md:w-[320px] snap-center"
+                                    className="flex-shrink-0 w-[280px] md:w-[320px] snap-center py-6 px-2" // Added padding for scale buffer
                                 >
                                     <motion.div
                                         whileHover={{ 
@@ -252,7 +252,8 @@ const RelationshipCards = () => {
                                             translateZ: 20,
                                             transition: { duration: 0.3 }
                                         }}
-                                        className="h-full"
+                                        className="h-full transform-gpu" // Added transform-gpu to ensure hardware acceleration
+                                        style={{ transformOrigin: 'center center' }} // Set transform origin to center
                                     >
                                         <Card className="group relative overflow-hidden p-6 md:p-8 rounded-2xl w-full h-full transition-all duration-300 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 transform-gpu hover:shadow-[0_0_15px_-5px] hover:shadow-purple-500/30 dark:hover:shadow-orange-500/30 before:absolute before:inset-0 before:bg-gradient-to-br before:from-purple-600/5 before:to-orange-500/5 dark:before:from-orange-400/5 dark:before:to-purple-500/5 before:opacity-0 before:transition-opacity hover:before:opacity-100">
                                             <motion.div 

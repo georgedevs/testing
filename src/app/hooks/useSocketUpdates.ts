@@ -1,11 +1,10 @@
-// src/hooks/useSocketUpdates.ts
 import { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { apiSlice } from '@/redux/feautures/api/apiSlice';
 import { useDispatch } from 'react-redux';
 
-// Define the valid tag types
+//valid tag types
 type TagTypes = 
   | 'User'
   | 'Notification'

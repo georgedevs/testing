@@ -5,6 +5,7 @@ import Loader from '@/components/Loader';
 import { useSelector } from 'react-redux';
 import OfflineStatusHandler from '@/components/OfflineStatusHandler';
 import { useAuthCheck } from '@/utils/useAuthCheck';
+import { Toaster } from 'sonner';
 
 const publicRoutes = [
     '/',
@@ -36,7 +37,7 @@ export default function AuthWrapper({
         if (!checkComplete) return;
 
         const isPublicRoute = publicRoutes.some(route => 
-            pathname === route || pathname.startsWith('/resources/'));
+            pathname === route || pathname?.startsWith('/resources/'));
 
         if (!isPublicRoute) {
             if (!isAuthenticated || !user) {
@@ -45,11 +46,10 @@ export default function AuthWrapper({
         }
     }, [pathname, checkComplete, isAuthenticated, user, router]);
 
-    // Wrap everything in the OfflineStatusHandler
     return (
         <OfflineStatusHandler>
-            {isLoading && !publicRoutes.includes(pathname) && 
-             !pathname.startsWith('/resources/') ? (
+            {isLoading && !publicRoutes.includes(pathname || '') && 
+             !pathname?.startsWith('/resources/') ? (
                 <Loader />
             ) : (
                 children

@@ -1,10 +1,10 @@
 "use client"
-import React, { useEffect } from 'react'
+import React from 'react'
 import Heading from '@/components/Heading'
 import { DashboardHeader } from '@/components/admin/DashboardHeader'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import { Loader } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/redux/store'
@@ -33,8 +33,11 @@ const AdminDashboardPage = () => {
     }
   };
   
-  
-  if (isLoading) return <Loader />;
+  if (isLoading) return (
+    <div className="flex items-center justify-center h-screen">
+      <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+    </div>
+  );
 
   return (
     <>

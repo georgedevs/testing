@@ -7,12 +7,10 @@ import Footer from '../pages/Footer';
 import { Star, Quote, Heart } from 'lucide-react';
 
 const StoriesPage = () => {
-  // Refs for scroll animations
   const containerRef = useRef(null);
   const heroRef = useRef(null);
   const storiesRef = useRef(null);
 
-  // Scroll progress animations
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"]
@@ -22,11 +20,10 @@ const StoriesPage = () => {
   const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
   const heroY = useTransform(scrollYProgress, [0, 0.2], [0, -50]);
 
-  // Viewport detection
   const isHeroInView = useInView(heroRef, { once: false, margin: "-100px" });
   const isStoriesInView = useInView(storiesRef, { once: false, margin: "-100px" });
 
-  // Animation variants
+
   const fadeInUpVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: { opacity: 1, y: 0 }

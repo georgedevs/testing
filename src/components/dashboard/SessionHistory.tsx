@@ -19,7 +19,7 @@ const SessionHistory = () => {
   const router = useRouter();
   const { data: historyData, isLoading } = useGetClientSessionHistoryQuery();
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
         return 'bg-green-500/10 text-green-500 border-green-500/20';
@@ -32,7 +32,7 @@ const SessionHistory = () => {
     } 
   };
 
-  const getSessionTypeIcon = (type) => {
+  const getSessionTypeIcon = (type: string) => {
     return type === 'virtual' ? (
       <Video className={`w-3 h-3 md:w-4 md:h-4 flex-shrink-0`} />
     ) : (

@@ -46,8 +46,6 @@ interface ApiError {
   };
 }
 
-
-
 export default function MeetingRequests() {
   const socket = useSocket();
   const { data, isLoading, error, refetch } = useGetMeetingRequestsQuery(undefined, {
@@ -178,7 +176,7 @@ export default function MeetingRequests() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-100">
-                    {request.clientId.avatar?.imageUrl ? (
+                    {request.clientId && request.clientId.avatar?.imageUrl ? (
                       <img 
                         src={request.clientId.avatar.imageUrl} 
                         alt={`${request.clientId.username}'s avatar`}
@@ -190,10 +188,10 @@ export default function MeetingRequests() {
                   </div>
                   <div>
                     <CardTitle className="text-lg">
-                      {request.clientId.username}
+                      {request.clientId?.username || "Unknown User"}
                     </CardTitle>
                     <CardDescription>
-                      {request.clientId.email}
+                      {request.clientId?.email || "No email available"}
                     </CardDescription>
                   </div>
                 </div>
@@ -207,7 +205,7 @@ export default function MeetingRequests() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {(request.clientId.age || request.clientId.marriageYears || request.clientId.preferredCounselorGender) && (
+                {request.clientId && (request.clientId.age || request.clientId.marriageYears || request.clientId.preferredCounselorGender) && (
                   <div className="flex flex-wrap gap-4">
                     {request.clientId.age && (
                       <Badge variant="outline" className="flex items-center gap-1">
@@ -243,7 +241,7 @@ export default function MeetingRequests() {
                     Issue Description
                   </p>
                   <p className="mt-1">
-                    {request.issueDescription}
+                    {request.issueDescription || "No description provided"}
                   </p>
                 </div>
                 <div>
@@ -323,4 +321,3 @@ export default function MeetingRequests() {
     </div>
   );
 }
-

@@ -1,7 +1,5 @@
 export const AUTH_STATUS_KEY = 'auth_status';
 
-// Using localStorage only to track login state on the client
-// No sensitive data is stored here
 export const authService = {
   setLoginStatus: (isLoggedIn: boolean) => {
     if (typeof window !== 'undefined') {

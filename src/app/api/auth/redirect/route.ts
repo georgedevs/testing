@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-// Define the role redirects type
 type RoleRedirects = {
   client: string;
   admin: string;

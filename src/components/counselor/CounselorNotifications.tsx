@@ -1,10 +1,8 @@
-// src/components/counselor/CounselorNotifications.tsx
 'use client'
 import React, { useState, useEffect } from 'react';
 import { 
   Bell, 
-  Loader2, 
-  Calendar, 
+  Loader2,  
   Star, 
   UserCheck,
   Clock,

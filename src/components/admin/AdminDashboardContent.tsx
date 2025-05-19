@@ -12,7 +12,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 interface AdminDashboardContentProps {
-  user: any; // Replace with proper user type
+  user: any; //replace this later with actual user type, so lazy right now
 }
 
 const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ user }) => {

@@ -2,7 +2,7 @@ import { apiSlice } from "../api/apiSlice";
 import { ClientInfo , CounselorInfo, MeetingType, MeetingStatus} from "../booking/bookingApi";
 import { BaseMeeting } from "../booking/bookingApi";
 
-// Interfaces for the admin dashboard
+// Interfaces 
 export interface Meeting extends BaseMeeting {
   clientId: ClientInfo; 
   counselorId: CounselorInfo;
@@ -125,7 +125,6 @@ interface FeedbackQueryParams extends ListQueryParams {
   counselorId?: string;
 }
 
-// Admin API slice
 export const adminApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Meetings endpoints

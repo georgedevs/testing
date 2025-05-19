@@ -2,7 +2,6 @@
 import LandingPage from './pages/LandingPage';
 import RelationshipCards from './pages/RelationshipCard';
 import AfterCard from './pages/AfterCard';
-import TestimonialSection from './pages/TestimonialSection';
 import AfterTestimonial from './pages/AfterTestimonial';
 import Footer from './pages/Footer';
 import Heading from '@/components/Heading';

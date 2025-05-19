@@ -1,4 +1,3 @@
-// src/redux/features/auth/authApi.ts (UPDATED)
 import { IUser } from "@/redux/types/auth";
 import { apiSlice } from "../api/apiSlice";
 import { userLoggedIn, userLoggedOut, userRegistration } from "./authSlice";

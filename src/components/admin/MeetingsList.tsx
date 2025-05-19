@@ -368,8 +368,6 @@ export default function MeetingsList() {
         )}
       </div>
 
-{/* Previous content remains the same until the pagination section */}
-
       {/* Pagination */}
       {data?.data.pagination && data.data.meetings.length > 0 && (
         <div className="flex items-center justify-between mt-8 sticky bottom-0 bg-background/80 backdrop-blur-lg p-4 -mx-4 border-t border-border">
