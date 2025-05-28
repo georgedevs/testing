@@ -31,17 +31,22 @@ import {
   TooltipTrigger,
   TooltipProvider
 } from "@/components/ui/tooltip";
+import { useGetPendingCounselorsQuery } from '@/redux/feautures/auth/authApi';
+import { useGetMeetingRequestsCountQuery } from '@/redux/feautures/booking/bookingApi'; 
+import { Badge } from '../ui/badge';
 
 interface NavItem {
   title: string;
   icon: React.ReactNode;
   href: string;
+  showBadge?: boolean;
+  badgeType?: 'counselors' | 'meetings'; //  badge type to distinguish
 }
 
 const navigation: NavItem[] = [
   { title: 'Dashboard Home', icon: <Home className="w-5 h-5" />, href: '/admin' },
-  { title: 'Counselors', icon: <Users className="w-5 h-5" />, href: '/admin/counselors' },
-  { title: 'Meeting Requests', icon: <Calendar className="w-5 h-5" />, href: '/admin/requests' },
+  { title: 'Counselors', icon: <Users className="w-5 h-5" />, href: '/admin/counselors', showBadge: true, badgeType: 'counselors' },
+  { title: 'Meeting Requests', icon: <Calendar className="w-5 h-5" />, href: '/admin/requests', showBadge: true, badgeType: 'meetings' }, // Add badge here
   { title: 'Meeting History', icon: <History className="w-5 h-5" />, href: '/admin/meetings' },
   { title: 'Session History', icon: <Video className="w-5 h-5" />, href: '/admin/sessions' },
   { title: 'Analytics', icon: <BarChart2 className="w-5 h-5" />, href: '/admin/analytics' },
@@ -52,6 +57,25 @@ const navigation: NavItem[] = [
 export const MobileNav = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = React.useState(false);
+
+  // Get both pending counselors and meeting requests counts
+  const { data: pendingData } = useGetPendingCounselorsQuery();
+  const { data: meetingRequestsData } = useGetMeetingRequestsCountQuery(); 
+  
+  const pendingCounselorsCount = pendingData?.count || 0;
+  const meetingRequestsCount = meetingRequestsData?.count || 0;
+
+  // Helper function to get badge count based on type
+  const getBadgeCount = (badgeType?: string) => {
+    switch (badgeType) {
+      case 'counselors':
+        return pendingCounselorsCount;
+      case 'meetings':
+        return meetingRequestsCount;
+      default:
+        return 0;
+    }
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -66,7 +90,6 @@ export const MobileNav = () => {
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-72 p-0">
-        {/* Add SheetHeader and SheetTitle components */}
         <SheetHeader className="p-6">
           <SheetTitle>
             <Link href="/admin" onClick={() => setIsOpen(false)}>
@@ -78,38 +101,75 @@ export const MobileNav = () => {
         </SheetHeader>
         <ScrollArea className="flex-1 px-4">
           <div className="space-y-2 py-4">
-            {navigation.map((item) => (
-              <Link
-                key={item.title}
-                href={item.href}
-                onClick={() => setIsOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition-all",
-                  pathname === item.href
-                    ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/20"
-                    : "text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20",
-                  "group relative overflow-hidden"
-                )}
-              >
-                <div className={cn(
-                  "absolute inset-0 bg-gradient-to-r from-blue-600/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity",
-                  pathname === item.href && "opacity-100"
-                )} />
-                <div className="relative z-10 flex items-center gap-3">
-                  {item.icon}
-                  <span className="font-medium">{item.title}</span>
-                </div>
-              </Link>
-            ))}
+            {navigation.map((item) => {
+              const badgeCount = getBadgeCount(item.badgeType);
+              
+              return (
+                <Link
+                  key={item.title}
+                  href={item.href}
+                  onClick={() => setIsOpen(false)}
+                  className={cn(
+                    "flex items-center justify-between rounded-xl px-4 py-3 text-sm transition-all",
+                    pathname === item.href
+                      ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/20"
+                      : "text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20",
+                    "group relative overflow-hidden"
+                  )}
+                >
+                  <div className={cn(
+                    "absolute inset-0 bg-gradient-to-r from-blue-600/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity",
+                    pathname === item.href && "opacity-100"
+                  )} />
+                  <div className="relative z-10 flex items-center gap-3">
+                    {item.icon}
+                    <span className="font-medium">{item.title}</span>
+                  </div>
+
+                  {/* Show badge when there are pending items */}
+                  {item.showBadge && badgeCount > 0 && (
+                    <Badge 
+                      variant="destructive" 
+                      className={cn(
+                        "text-white text-xs px-2 py-0.5 min-w-[20px] h-5 flex items-center justify-center animate-pulse",
+                        item.badgeType === 'counselors' ? "bg-red-500 hover:bg-red-600" : "bg-orange-500 hover:bg-orange-600"
+                      )}
+                    >
+                      {badgeCount}
+                    </Badge>
+                  )}
+                </Link>
+              );
+            })}
           </div>
         </ScrollArea>
       </SheetContent>
     </Sheet>
   );
 };
+
 export const AdminSidebar = () => {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const pathname = usePathname();
+  
+  // Get both pending counselors and meeting requests counts
+  const { data: pendingData } = useGetPendingCounselorsQuery();
+  const { data: meetingRequestsData } = useGetMeetingRequestsCountQuery(); // Use count query
+  
+  const pendingCounselorsCount = pendingData?.count || 0;
+  const meetingRequestsCount = meetingRequestsData?.count || 0;
+
+  // Helper function to get badge count based on type
+  const getBadgeCount = (badgeType?: string) => {
+    switch (badgeType) {
+      case 'counselors':
+        return pendingCounselorsCount;
+      case 'meetings':
+        return meetingRequestsCount;
+      default:
+        return 0;
+    }
+  };
 
   return (
     <TooltipProvider>
@@ -147,37 +207,75 @@ export const AdminSidebar = () => {
 
           <ScrollArea className="flex-1 px-4">
             <div className="space-y-2 py-4">
-              {navigation.map((item) => (
-                <Tooltip key={item.title} delayDuration={0}>
-                  <TooltipTrigger asChild>
-                    <Link
-                      href={item.href}
-                      className={cn(
-                        "flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition-all",
-                        pathname === item.href
-                          ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/20" 
-                          : "text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20",
-                        isCollapsed && "justify-center",
-                        "group relative overflow-hidden"
-                      )}
-                    >
-                      <div className={cn(
-                        "absolute inset-0 bg-gradient-to-r from-blue-600/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity",
-                        pathname === item.href && "opacity-100"
-                      )} />
-                      <div className="relative z-10 flex items-center gap-3">
-                        {item.icon}
-                        {!isCollapsed && <span className="font-medium">{item.title}</span>}
-                      </div>
-                    </Link>
-                  </TooltipTrigger>
-                  {isCollapsed && (
-                    <TooltipContent side="right" className="font-medium">
-                      {item.title}
-                    </TooltipContent>
-                  )}
-                </Tooltip>
-              ))}
+              {navigation.map((item) => {
+                const badgeCount = getBadgeCount(item.badgeType);
+                
+                return (
+                  <Tooltip key={item.title} delayDuration={0}>
+                    <TooltipTrigger asChild>
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          "flex items-center rounded-xl px-4 py-3 text-sm transition-all",
+                          pathname === item.href
+                            ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/20" 
+                            : "text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20",
+                          isCollapsed ? "justify-center" : "justify-between",
+                          "group relative overflow-hidden"
+                        )}
+                      >
+                        <div className={cn(
+                          "absolute inset-0 bg-gradient-to-r from-blue-600/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity",
+                          pathname === item.href && "opacity-100"
+                        )} />
+                        <div className="relative z-10 flex items-center gap-3">
+                          {item.icon}
+                          {!isCollapsed && <span className="font-medium">{item.title}</span>}
+                        </div>
+
+                        {/* Show badge when there are pending items */}
+                        {item.showBadge && badgeCount > 0 && !isCollapsed && (
+                          <Badge 
+                            variant="destructive" 
+                            className={cn(
+                              "text-white text-xs px-2 py-0.5 min-w-[20px] h-5 flex items-center justify-center animate-pulse",
+                              item.badgeType === 'counselors' ? "bg-red-500 hover:bg-red-600" : "bg-orange-500 hover:bg-orange-600"
+                            )}
+                          >
+                            {badgeCount}
+                          </Badge>
+                        )}
+
+                        {/* Show badge as dot when collapsed */}
+                        {item.showBadge && badgeCount > 0 && isCollapsed && (
+                          <div className={cn(
+                            "absolute -top-1 -right-1 w-3 h-3 rounded-full animate-pulse",
+                            item.badgeType === 'counselors' ? "bg-red-500" : "bg-orange-500"
+                          )} />
+                        )}
+                      </Link>
+                    </TooltipTrigger>
+                    {isCollapsed && (
+                      <TooltipContent side="right" className="font-medium">
+                        <div className="flex items-center gap-2">
+                          {item.title}
+                          {item.showBadge && badgeCount > 0 && (
+                            <Badge 
+                              variant="destructive" 
+                              className={cn(
+                                "text-white text-xs px-1.5 py-0.5 min-w-[18px] h-4 flex items-center justify-center",
+                                item.badgeType === 'counselors' ? "bg-red-500" : "bg-orange-500"
+                              )}
+                            >
+                              {badgeCount}
+                            </Badge>
+                          )}
+                        </div>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                );
+              })}
             </div>
           </ScrollArea>
         </div>

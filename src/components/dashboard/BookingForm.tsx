@@ -13,7 +13,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from '@/components/ui/textarea';
 import { useInitiateBookingMutation } from '@/redux/feautures/booking/bookingApi';
 import { useSocket } from '../SocketProvider';
-import { useLoadUserQuery } from '@/redux/feautures/api/apiSlice';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
 
 interface BookingFormProps {
   onBookingSuccess?: () => void;
@@ -26,25 +27,22 @@ const BookingForm: React.FC<BookingFormProps> = ({ onBookingSuccess }) => {
   const [error, setError] = useState('');
   
   const socket = useSocket();
-  const { data: userData, isLoading: isUserLoading } = useLoadUserQuery();
+  const user = useSelector((state: RootState) => state.auth.user);
   const [initiateBooking, { isLoading }] = useInitiateBookingMutation();
 
-  // Log when user data changes
   useEffect(() => {
-    console.log('User Data Updated:', {
-      userData,
-      currentCounselor: userData?.user?.currentCounselor,
-      isUserLoading,
+    console.log('Current User Data:', {
+      user,
+      currentCounselor: user?.currentCounselor,
       usePreviousCounselor
     });
-  }, [userData, isUserLoading, usePreviousCounselor]);
+  }, [user, usePreviousCounselor]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
-    // Enhanced debug logging
-    const hasCurrentCounselor = !!userData?.user?.currentCounselor;
+    const hasCurrentCounselor = !!user?.currentCounselor;
     const shouldUseCurrentCounselor = hasCurrentCounselor && usePreviousCounselor;
     
     console.log('Submit Data:', {
@@ -53,8 +51,8 @@ const BookingForm: React.FC<BookingFormProps> = ({ onBookingSuccess }) => {
       usePreviousCounselor,
       hasCurrentCounselor,
       shouldUseCurrentCounselor,
-      currentCounselorId: userData?.user?.currentCounselor?._id || "Not set",
-      currentCounselorData: userData?.user?.currentCounselor
+      currentCounselorId: user?.currentCounselor?._id || "Not set",
+      currentCounselorData: user?.currentCounselor
     });
     
     if (!issueDescription.trim()) {
@@ -105,7 +103,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ onBookingSuccess }) => {
             </Alert>
           )}
           
-          {userData?.user?.currentCounselor && (
+          {user?.currentCounselor && (
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="usePreviousCounselor"
@@ -116,7 +114,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ onBookingSuccess }) => {
                 htmlFor="usePreviousCounselor"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                Book with your previous counselor ({userData.user.currentCounselor.fullName || 'Unknown'})
+                Book with your previous counselor ({user.currentCounselor.fullName || 'Previous Counselor'})
               </label>
             </div>
           )}

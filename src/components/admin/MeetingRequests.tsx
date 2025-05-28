@@ -10,7 +10,8 @@ import {
   Users,
   Heart,
   UserCheck,
-  Clock
+  Clock,
+  Activity
 } from 'lucide-react';
 import {
   Card,
@@ -37,7 +38,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { MeetingRequest, useAssignCounselorMutation, useGetMeetingRequestsQuery } from '@/redux/feautures/booking/bookingApi';
-import { useGetAllCounselorsQuery } from '@/redux/feautures/admin/adminApi';
+import { useGetActiveCounselorsQuery } from '@/redux/feautures/admin/adminApi'; // Updated import
 import { useSocket } from '../SocketProvider';
 
 interface ApiError {
@@ -53,13 +54,16 @@ export default function MeetingRequests() {
     refetchOnFocus: true,            
     refetchOnReconnect: true          
   });
-  const { data: counselorsData } = useGetAllCounselorsQuery()
+  const { data: counselorsData } = useGetActiveCounselorsQuery() // Use the new active counselors query
   const [assignCounselor] = useAssignCounselorMutation();
   
   const [selectedRequest, setSelectedRequest] = useState<MeetingRequest | null>(null);
   const [selectedCounselor, setSelectedCounselor] = useState('');
   const [assignmentError, setAssignmentError] = useState('');
   const [isAssigning, setIsAssigning] = useState(false);
+
+  // Now we get only active and available counselors from the API
+  const activeCounselors = counselorsData?.counselors || [];
 
   useEffect(() => {
     if (!socket) return;
@@ -126,7 +130,7 @@ export default function MeetingRequests() {
   return (
     <div className="space-y-6">
       {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
@@ -166,7 +170,33 @@ export default function MeetingRequests() {
             </div>
           </CardContent>
         </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">
+              Available Counselors
+            </CardTitle>
+            <Activity className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              {activeCounselors.length}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Ready for assignment</p>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Show warning if no active counselors available */}
+   {activeCounselors.length === 0 && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="text-red-800 dark:text-red-200">
+            <strong className="text-red-900 dark:text-red-100">No active counselors available!</strong> 
+            <br />
+            <span className="text-red-800 dark:text-red-200">Please approve and activate counselors in the Counselors section before assigning meetings.</span>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Requests List */}
       <div className="space-y-4">
@@ -198,8 +228,9 @@ export default function MeetingRequests() {
                 <Button 
                   variant="outline"
                   onClick={() => setSelectedRequest(request)}
+                  disabled={activeCounselors.length === 0}
                 >
-                  Assign Counselor
+                  {activeCounselors.length === 0 ? 'No Counselors Available' : 'Assign Counselor'}
                 </Button>
               </div>
             </CardHeader>
@@ -256,6 +287,20 @@ export default function MeetingRequests() {
             </CardContent>
           </Card>
         ))}
+
+        {data?.requests.length === 0 && (
+          <Card className="p-8 text-center">
+            <div className="flex flex-col items-center gap-4">
+              <Calendar className="w-12 h-12 text-gray-400" />
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">No Meeting Requests</h3>
+                <p className="text-gray-500 dark:text-gray-400 mt-1">
+                  There are currently no pending meeting requests.
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
       </div>
 
       {/* Assignment Dialog */}
@@ -270,7 +315,7 @@ export default function MeetingRequests() {
           <DialogHeader>
             <DialogTitle>Assign Counselor</DialogTitle>
             <DialogDescription>
-              Select a counselor for this session request
+              Select an active and available counselor for this session request
             </DialogDescription>
           </DialogHeader>
 
@@ -282,39 +327,60 @@ export default function MeetingRequests() {
               </Alert>
             )}
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Select Counselor</label>
-              <Select
-                value={selectedCounselor}
-                onValueChange={setSelectedCounselor}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a counselor" />
-                </SelectTrigger>
-                <SelectContent>
-                  {counselorsData?.counselors.map((counselor) => (
-                    <SelectItem key={counselor._id} value={counselor._id}>
-                      {counselor.fullName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {activeCounselors.length === 0 ? (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>No active counselors available!</strong>
+                  <br />Please approve and activate counselors before making assignments.
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Select Active Counselor</label>
+                  <Select
+                    value={selectedCounselor}
+                    onValueChange={setSelectedCounselor}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose an active counselor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {activeCounselors.map((counselor) => (
+                        <SelectItem key={counselor._id} value={counselor._id}>
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span>{counselor.fullName}</span>
+                            <span className="text-xs text-gray-500">
+                              ({counselor.activeClients} active clients)
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-gray-500">
+                    Only active and available counselors are shown
+                  </p>
+                </div>
 
-            <Button 
-              className="w-full" 
-              onClick={handleAssign}
-              disabled={isAssigning}
-            >
-              {isAssigning ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Assigning...
-                </>
-              ) : (
-                'Assign Counselor'
-              )}
-            </Button>
+                <Button 
+                  className="w-full" 
+                  onClick={handleAssign}
+                  disabled={isAssigning || !selectedCounselor}
+                >
+                  {isAssigning ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Assigning...
+                    </>
+                  ) : (
+                    'Assign Counselor'
+                  )}
+                </Button>
+              </>
+            )}
           </div>
         </DialogContent>
       </Dialog>

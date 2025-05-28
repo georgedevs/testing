@@ -51,7 +51,7 @@ const LandingPage = () => {
             initial={{ scale: 1.1, opacity: 0 }}
             animate={{ scale: 1, opacity: 0.8 }}
             transition={{ duration: 0.8 }}
-            src="/hero2.jpg"
+            src="/hero.jpg"
             alt="Couple connection"
             className="object-cover w-full h-full dark:opacity-30"
           />

@@ -285,7 +285,7 @@ export const bookingApi = apiSlice.injectEndpoints({
     }),
 
     // Meeting requests endpoints
-    getMeetingRequests: builder.query<{ requests: MeetingRequest[] }, void>({
+    getMeetingRequests: builder.query<{ requests: MeetingRequest[], count:number }, void>({
       query: () => ({
         url: "/meetings/requests",
         method: "GET",
@@ -293,6 +293,16 @@ export const bookingApi = apiSlice.injectEndpoints({
       }),
       providesTags: ['MeetingRequests'],
     }),
+
+    getMeetingRequestsCount: builder.query<{ count: number }, void>({
+      query: () => ({
+        url: "/meetings/requests/count",
+        method: "GET",
+        credentials: "include" as const,
+      }),
+      providesTags: ['MeetingRequests'],
+    }),
+
 
     assignCounselor: builder.mutation<
       { success: boolean; message: string },
@@ -416,6 +426,7 @@ export const {
   useCancelBookingMutation,
   // Meeting requests hooks
   useGetMeetingRequestsQuery,
+  useGetMeetingRequestsCountQuery,
   useAssignCounselorMutation,
   // Counselor hooks
   useGetCounselorMeetingsQuery,

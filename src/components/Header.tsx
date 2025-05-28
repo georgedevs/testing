@@ -23,6 +23,9 @@ interface ThemeToggleButtonProps {
   mounted: boolean;
 }
 
+// Import the HeartLogo component
+import HeartLogo from '@/components/HeartLogo';
+
 const ThemeToggleButton = memo(({ 
   className = '', 
   showIcon = true, 
@@ -69,10 +72,9 @@ const Header = () => {
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const [mounted, setMounted] = useState(false);
 
-useEffect(() => {
-  setMounted(true);
-}, []);
-
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const currentYear = new Date().getFullYear();
 
@@ -143,20 +145,30 @@ useEffect(() => {
         className="fixed top-0 left-0 right-0 z-40 backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-b border-gray-200 dark:border-gray-800"
       >
         <div className="px-4 md:px-8 py-4 flex items-center justify-between">
-        <div 
-  onClick={handleHomeClick}
-  className="cursor-pointer text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent hover:opacity-80 transition-opacity duration-300"
->
-  MiCounselor
-</div>
+          {/* Logo with Heart - Updated Section */}
+          <motion.div 
+            onClick={handleHomeClick}
+            className="cursor-pointer flex items-center gap-2 hover:opacity-80 transition-opacity duration-300"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <HeartLogo 
+              className="w-9 h-9 md:w-10 md:h-10 hover:scale-110 transition-transform duration-300" 
+              size={40}
+            />
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent">
+              MiCounselor
+            </h1>
+          </motion.div>
+
           {/* Mobile Menu Button */}
           <div className="flex items-center gap-4 md:hidden">
-          <ThemeToggleButton 
-  className="w-10 h-10 rounded-full"
-  theme={theme}
-  toggleTheme={toggleTheme}
-  mounted={mounted}
-/>
+            <ThemeToggleButton 
+              className="w-10 h-10 rounded-full"
+              theme={theme}
+              toggleTheme={toggleTheme}
+              mounted={mounted}
+            />
             
             <motion.button
               ref={menuButtonRef}
@@ -250,11 +262,11 @@ useEffect(() => {
             
             {/* Desktop Theme Toggle with Animation */}
             <ThemeToggleButton 
-  className="w-10 h-10 rounded-full"
-  theme={theme}
-  toggleTheme={toggleTheme}
-  mounted={mounted}
-/>
+              className="w-10 h-10 rounded-full"
+              theme={theme}
+              toggleTheme={toggleTheme}
+              mounted={mounted}
+            />
 
             {/* Get Started Button with Animation */}
             <motion.button 
@@ -406,7 +418,7 @@ useEffect(() => {
                   </motion.div>
                 </div>
 
-                {/* Animated Copyright Section */}
+                {/* Animated Copyright Section with Heart */}
                 <motion.div 
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -417,8 +429,11 @@ useEffect(() => {
                     className="text-center"
                     whileHover={{ scale: 1.05 }}
                   >
-                    <div className="text-xl font-bold bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent mb-2">
-                      MiCounselor
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <HeartLogo className="w-7 h-7" size={28} />
+                      <div className="text-xl font-bold bg-gradient-to-r from-purple-600 to-orange-500 dark:from-orange-400 dark:to-purple-500 bg-clip-text text-transparent">
+                        MiCounselor
+                      </div>
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400">
                       © {currentYear} All rights reserved
